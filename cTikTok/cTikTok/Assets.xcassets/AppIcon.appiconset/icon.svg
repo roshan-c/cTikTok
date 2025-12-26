@@ -1,0 +1,29 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF006E"/>
+      <stop offset="50%" style="stop-color:#8338EC"/>
+      <stop offset="100%" style="stop-color:#3A86FF"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+  
+  <!-- Letter C -->
+  <path d="M620 300
+           C480 300, 340 400, 340 512
+           C340 624, 480 724, 620 724
+           L620 624
+           C520 624, 440 576, 440 512
+           C440 448, 520 400, 620 400
+           Z" 
+        fill="white"/>
+  
+  <!-- Play triangle inside C -->
+  <path d="M580 432
+           L580 592
+           L700 512
+           Z" 
+        fill="white"/>
+</svg>

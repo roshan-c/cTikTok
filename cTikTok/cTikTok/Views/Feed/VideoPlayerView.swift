@@ -157,7 +157,7 @@ struct VideoPlayerView: View {
             }
             
             if let author = video.tiktokAuthor {
-                Text("From: @\(author)")
+                Text("From: \(author.hasPrefix("@") ? author : "@\(author)")")
                     .font(.subheadline)
                     .foregroundStyle(.white.opacity(0.8))
             }
@@ -168,10 +168,6 @@ struct VideoPlayerView: View {
                     .foregroundStyle(.white.opacity(0.9))
                     .lineLimit(2)
             }
-            
-            Text(video.createdAt, style: .relative)
-                .font(.caption2)
-                .foregroundStyle(.white.opacity(0.6))
         }
         .frame(maxWidth: 250, alignment: .leading)
     }
@@ -390,7 +386,7 @@ struct CustomVideoPlayer: UIViewControllerRepresentable {
         let controller = AVPlayerViewController()
         controller.player = player
         controller.showsPlaybackControls = false
-        controller.videoGravity = .resizeAspectFill
+        controller.videoGravity = .resizeAspect
         return controller
     }
     
