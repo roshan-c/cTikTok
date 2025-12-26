@@ -1,0 +1,3 @@
+ctiktok.roshanc.com {
+    reverse_proxy ctiktok:3000
+}

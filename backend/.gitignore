@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Database
+data/
+*.db
+*.db-journal
+*.db-wal
+
+# Video storage
+videos/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Build
+dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Drizzle
+drizzle/

@@ -1,0 +1,616 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		11111111111111111111111A /* cTikTokApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11111111111111111111111B /* cTikTokApp.swift */; };
+		11111111111111111111111C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11111111111111111111111D /* ContentView.swift */; };
+		11111111111111111111111E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 11111111111111111111111F /* Assets.xcassets */; };
+		111111111111111111111120 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111111111111111111111121 /* Constants.swift */; };
+		111111111111111111111122 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111111111111111111111123 /* KeychainHelper.swift */; };
+		111111111111111111111124 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111111111111111111111125 /* Models.swift */; };
+		111111111111111111111126 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111111111111111111111127 /* APIService.swift */; };
+		111111111111111111111128 /* VideoCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111111111111111111111129 /* VideoCache.swift */; };
+		11111111111111111111112A /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11111111111111111111112B /* AuthViewModel.swift */; };
+		11111111111111111111112C /* VideoFeedViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11111111111111111111112D /* VideoFeedViewModel.swift */; };
+		11111111111111111111112E /* SendVideoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11111111111111111111112F /* SendVideoViewModel.swift */; };
+		111111111111111111111130 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111111111111111111111131 /* LoginView.swift */; };
+		111111111111111111111132 /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111111111111111111111133 /* RegisterView.swift */; };
+		111111111111111111111134 /* VideoFeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111111111111111111111135 /* VideoFeedView.swift */; };
+		111111111111111111111136 /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111111111111111111111137 /* VideoPlayerView.swift */; };
+		111111111111111111111138 /* EmptyFeedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111111111111111111111139 /* EmptyFeedView.swift */; };
+		11111111111111111111113A /* SendVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11111111111111111111113B /* SendVideoView.swift */; };
+		11111111111111111111113C /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11111111111111111111113D /* ShareViewController.swift */; };
+		11111111111111111111113E /* ShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11111111111111111111113F /* ShareView.swift */; };
+		111111111111111111111140 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111111111111111111111121 /* Constants.swift */; };
+		111111111111111111111141 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111111111111111111111123 /* KeychainHelper.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		111111111111111111111145 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		11111111111111111111111B /* cTikTokApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cTikTokApp.swift; sourceTree = "<group>"; };
+		11111111111111111111111D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		11111111111111111111111F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		111111111111111111111121 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		111111111111111111111123 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
+		111111111111111111111125 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		111111111111111111111127 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
+		111111111111111111111129 /* VideoCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCache.swift; sourceTree = "<group>"; };
+		11111111111111111111112B /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		11111111111111111111112D /* VideoFeedViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFeedViewModel.swift; sourceTree = "<group>"; };
+		11111111111111111111112F /* SendVideoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendVideoViewModel.swift; sourceTree = "<group>"; };
+		111111111111111111111131 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		111111111111111111111133 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
+		111111111111111111111135 /* VideoFeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFeedView.swift; sourceTree = "<group>"; };
+		111111111111111111111137 /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
+		111111111111111111111139 /* EmptyFeedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyFeedView.swift; sourceTree = "<group>"; };
+		11111111111111111111113B /* SendVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendVideoView.swift; sourceTree = "<group>"; };
+		11111111111111111111113D /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		11111111111111111111113F /* ShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareView.swift; sourceTree = "<group>"; };
+		111111111111111111111146 /* cTikTok.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cTikTok.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		111111111111111111111147 /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		111111111111111111111148 /* cTikTok.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = cTikTok.entitlements; sourceTree = "<group>"; };
+		111111111111111111111149 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
+		11111111111111111111114A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		11111111111111111111114B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		11111111111111111111114C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		11111111111111111111114D = {
+			isa = PBXGroup;
+			children = (
+				11111111111111111111114E /* cTikTok */,
+				11111111111111111111114F /* ShareExtension */,
+				111111111111111111111150 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		11111111111111111111114E /* cTikTok */ = {
+			isa = PBXGroup;
+			children = (
+				111111111111111111111148 /* cTikTok.entitlements */,
+				11111111111111111111111B /* cTikTokApp.swift */,
+				111111111111111111111151 /* Views */,
+				111111111111111111111152 /* ViewModels */,
+				111111111111111111111153 /* Models */,
+				111111111111111111111154 /* Services */,
+				111111111111111111111155 /* Utilities */,
+				111111111111111111111156 /* Shared */,
+				11111111111111111111111F /* Assets.xcassets */,
+			);
+			path = cTikTok;
+			sourceTree = "<group>";
+		};
+		11111111111111111111114F /* ShareExtension */ = {
+			isa = PBXGroup;
+			children = (
+				111111111111111111111149 /* ShareExtension.entitlements */,
+				11111111111111111111114A /* Info.plist */,
+				11111111111111111111113D /* ShareViewController.swift */,
+				11111111111111111111113F /* ShareView.swift */,
+			);
+			path = ShareExtension;
+			sourceTree = "<group>";
+		};
+		111111111111111111111150 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				111111111111111111111146 /* cTikTok.app */,
+				111111111111111111111147 /* ShareExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		111111111111111111111151 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				11111111111111111111111D /* ContentView.swift */,
+				111111111111111111111157 /* Auth */,
+				111111111111111111111158 /* Feed */,
+				111111111111111111111159 /* Send */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		111111111111111111111152 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				11111111111111111111112B /* AuthViewModel.swift */,
+				11111111111111111111112D /* VideoFeedViewModel.swift */,
+				11111111111111111111112F /* SendVideoViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		111111111111111111111153 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				111111111111111111111125 /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		111111111111111111111154 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				111111111111111111111127 /* APIService.swift */,
+				111111111111111111111129 /* VideoCache.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		111111111111111111111155 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				111111111111111111111123 /* KeychainHelper.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		111111111111111111111156 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				111111111111111111111121 /* Constants.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		111111111111111111111157 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				111111111111111111111131 /* LoginView.swift */,
+				111111111111111111111133 /* RegisterView.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		111111111111111111111158 /* Feed */ = {
+			isa = PBXGroup;
+			children = (
+				111111111111111111111135 /* VideoFeedView.swift */,
+				111111111111111111111137 /* VideoPlayerView.swift */,
+				111111111111111111111139 /* EmptyFeedView.swift */,
+			);
+			path = Feed;
+			sourceTree = "<group>";
+		};
+		111111111111111111111159 /* Send */ = {
+			isa = PBXGroup;
+			children = (
+				11111111111111111111113B /* SendVideoView.swift */,
+			);
+			path = Send;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		111111111111111111111144 /* ShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 11111111111111111111115E /* Build configuration list for PBXNativeTarget "ShareExtension" */;
+			buildPhases = (
+				11111111111111111111115F /* Sources */,
+				11111111111111111111114C /* Frameworks */,
+				111111111111111111111160 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ShareExtension;
+			productName = ShareExtension;
+			productReference = 111111111111111111111147 /* ShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		11111111111111111111115A /* cTikTok */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 11111111111111111111115B /* Build configuration list for PBXNativeTarget "cTikTok" */;
+			buildPhases = (
+				11111111111111111111115C /* Sources */,
+				11111111111111111111114B /* Frameworks */,
+				11111111111111111111115D /* Resources */,
+				111111111111111111111145 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = cTikTok;
+			productName = cTikTok;
+			productReference = 111111111111111111111146 /* cTikTok.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		111111111111111111111143 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					111111111111111111111144 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					11111111111111111111115A = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 111111111111111111111161 /* Build configuration list for PBXProject "cTikTok" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 11111111111111111111114D;
+			productRefGroup = 111111111111111111111150 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				11111111111111111111115A /* cTikTok */,
+				111111111111111111111144 /* ShareExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		11111111111111111111115D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				11111111111111111111111E /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		111111111111111111111160 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		11111111111111111111115C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				11111111111111111111111A /* cTikTokApp.swift in Sources */,
+				11111111111111111111111C /* ContentView.swift in Sources */,
+				111111111111111111111120 /* Constants.swift in Sources */,
+				111111111111111111111122 /* KeychainHelper.swift in Sources */,
+				111111111111111111111124 /* Models.swift in Sources */,
+				111111111111111111111126 /* APIService.swift in Sources */,
+				111111111111111111111128 /* VideoCache.swift in Sources */,
+				11111111111111111111112A /* AuthViewModel.swift in Sources */,
+				11111111111111111111112C /* VideoFeedViewModel.swift in Sources */,
+				11111111111111111111112E /* SendVideoViewModel.swift in Sources */,
+				111111111111111111111130 /* LoginView.swift in Sources */,
+				111111111111111111111132 /* RegisterView.swift in Sources */,
+				111111111111111111111134 /* VideoFeedView.swift in Sources */,
+				111111111111111111111136 /* VideoPlayerView.swift in Sources */,
+				111111111111111111111138 /* EmptyFeedView.swift in Sources */,
+				11111111111111111111113A /* SendVideoView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		11111111111111111111115F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				11111111111111111111113C /* ShareViewController.swift in Sources */,
+				11111111111111111111113E /* ShareView.swift in Sources */,
+				111111111111111111111140 /* Constants.swift in Sources */,
+				111111111111111111111141 /* KeychainHelper.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		111111111111111111111162 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		111111111111111111111163 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		111111111111111111111164 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = cTikTok/cTikTok.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XFQH7S77PL;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_BGTaskSchedulerPermittedIdentifiers = com.roshanc.ctiktok.refresh;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roshanc.ctiktok;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		111111111111111111111165 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = cTikTok/cTikTok.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = XFQH7S77PL;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_BGTaskSchedulerPermittedIdentifiers = com.roshanc.ctiktok.refresh;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roshanc.ctiktok;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		111111111111111111111166 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Send to cTikTok";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roshanc.ctiktok.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		111111111111111111111167 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Send to cTikTok";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roshanc.ctiktok.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		11111111111111111111115B /* Build configuration list for PBXNativeTarget "cTikTok" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				111111111111111111111164 /* Debug */,
+				111111111111111111111165 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		11111111111111111111115E /* Build configuration list for PBXNativeTarget "ShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				111111111111111111111166 /* Debug */,
+				111111111111111111111167 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		111111111111111111111161 /* Build configuration list for PBXProject "cTikTok" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				111111111111111111111162 /* Debug */,
+				111111111111111111111163 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 111111111111111111111143 /* Project object */;
+}
