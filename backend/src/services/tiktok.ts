@@ -87,6 +87,8 @@ async function downloadWithLibrary(url: string): Promise<DownloadResult> {
     // Handle slideshow (image type)
     if (contentType === 'image' && result.result.images && result.result.images.length > 0) {
       console.log(`[TikTok] Detected slideshow with ${result.result.images.length} images`);
+      console.log(`[TikTok] Music data:`, JSON.stringify(result.result.music));
+      console.log(`[TikTok] Full result keys:`, Object.keys(result.result));
       
       const slideshowId = generateVideoId();
       const slideshowDir = join(config.VIDEOS_PATH, `slideshow_${slideshowId}`);

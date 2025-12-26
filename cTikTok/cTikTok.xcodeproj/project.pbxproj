@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		012A5EFE2EFF029F00365820 /* SlideshowPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 012A5EFD2EFF029F00365820 /* SlideshowPlayerView.swift */; };
 		11111111111111111111111A /* cTikTokApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11111111111111111111111B /* cTikTokApp.swift */; };
 		11111111111111111111111C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11111111111111111111111D /* ContentView.swift */; };
 		11111111111111111111111E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 11111111111111111111111F /* Assets.xcassets */; };
@@ -44,6 +45,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		012A5EFD2EFF029F00365820 /* SlideshowPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideshowPlayerView.swift; sourceTree = "<group>"; };
 		11111111111111111111111B /* cTikTokApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cTikTokApp.swift; sourceTree = "<group>"; };
 		11111111111111111111111D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		11111111111111111111111F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -199,6 +201,7 @@
 		111111111111111111111158 /* Feed */ = {
 			isa = PBXGroup;
 			children = (
+				012A5EFD2EFF029F00365820 /* SlideshowPlayerView.swift */,
 				111111111111111111111135 /* VideoFeedView.swift */,
 				111111111111111111111137 /* VideoPlayerView.swift */,
 				111111111111111111111139 /* EmptyFeedView.swift */,
@@ -327,6 +330,7 @@
 				111111111111111111111134 /* VideoFeedView.swift in Sources */,
 				111111111111111111111136 /* VideoPlayerView.swift in Sources */,
 				111111111111111111111138 /* EmptyFeedView.swift in Sources */,
+				012A5EFE2EFF029F00365820 /* SlideshowPlayerView.swift in Sources */,
 				11111111111111111111113A /* SendVideoView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

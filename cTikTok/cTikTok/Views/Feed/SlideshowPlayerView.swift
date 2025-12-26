@@ -1,14 +1,15 @@
 import SwiftUI
-import AVKit
+import AVFoundation
 
 struct SlideshowPlayerView: View {
     let video: Video
     let isActive: Bool
     let viewModel: VideoFeedViewModel
     
-    @State private var currentIndex = 0
+    @State private var currentImageIndex = 0
     @State private var audioPlayer: AVAudioPlayer?
     @State private var isLoading = true
+    @State private var loadedImages: [UIImage] = []
     @State private var isLiked = false
     @State private var showHeartAnimation = false
     @State private var heartAnimationPosition: CGPoint = .zero
@@ -18,29 +19,17 @@ struct SlideshowPlayerView: View {
             ZStack {
                 Color.black
                 
-                // Image carousel
-                if !video.absoluteImageURLs.isEmpty {
-                    TabView(selection: $currentIndex) {
-                        ForEach(Array(video.absoluteImageURLs.enumerated()), id: \.offset) { index, url in
-                            AsyncImage(url: url) { phase in
-                                switch phase {
-                                case .empty:
-                                    ProgressView()
-                                        .tint(.white)
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                case .failure:
-                                    Image(systemName: "photo")
-                                        .font(.largeTitle)
-                                        .foregroundStyle(.gray)
-                                @unknown default:
-                                    EmptyView()
-                                }
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .tag(index)
+                if isLoading {
+                    ProgressView()
+                        .tint(.white)
+                } else if !loadedImages.isEmpty {
+                    // Image carousel
+                    TabView(selection: $currentImageIndex) {
+                        ForEach(0..<loadedImages.count, id: \.self) { index in
+                            Image(uiImage: loadedImages[index])
+                                .resizable()
+                                .scaledToFit()
+                                .tag(index)
                         }
                     }
                     .tabViewStyle(.page(indexDisplayMode: .never))
@@ -52,24 +41,18 @@ struct SlideshowPlayerView: View {
                     )
                 }
                 
-                // Loading indicator
-                if isLoading {
-                    ProgressView()
-                        .tint(.white)
-                }
-                
                 // Heart animation overlay
                 if showHeartAnimation {
                     HeartAnimationView()
                         .position(heartAnimationPosition)
                 }
                 
-                // Overlay content
+                // Overlay UI
                 VStack {
                     Spacer()
                     
                     HStack(alignment: .bottom) {
-                        videoInfo
+                        slideshowInfo
                         Spacer()
                         sideActions
                     }
@@ -77,41 +60,40 @@ struct SlideshowPlayerView: View {
                     .padding(.bottom, 12)
                     
                     // Page indicator dots
-                    PageIndicator(
-                        currentIndex: currentIndex,
-                        totalCount: video.imageCount ?? video.absoluteImageURLs.count
-                    )
-                    .padding(.bottom, 34)
+                    if loadedImages.count > 1 {
+                        PageIndicator(currentIndex: currentImageIndex, total: loadedImages.count)
+                            .padding(.bottom, 34)
+                    }
                 }
             }
         }
         .task {
-            await setupAudio()
+            await loadImages()
         }
         .onChange(of: isActive) { _, newValue in
             handleActiveChange(newValue)
         }
         .onDisappear {
-            cleanupAudio()
+            audioPlayer?.stop()
         }
     }
     
     // MARK: - Page Indicator
     struct PageIndicator: View {
         let currentIndex: Int
-        let totalCount: Int
+        let total: Int
         
         var body: some View {
             HStack(spacing: 6) {
-                ForEach(0..<totalCount, id: \.self) { index in
+                ForEach(0..<total, id: \.self) { index in
                     Circle()
                         .fill(index == currentIndex ? Color.white : Color.white.opacity(0.4))
                         .frame(width: 6, height: 6)
                 }
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(.ultraThinMaterial.opacity(0.5))
+            .padding(.vertical, 8)
+            .background(Color.black.opacity(0.3))
             .clipShape(Capsule())
         }
     }
@@ -142,8 +124,8 @@ struct SlideshowPlayerView: View {
         }
     }
     
-    // MARK: - Video Info
-    private var videoInfo: some View {
+    // MARK: - Slideshow Info
+    private var slideshowInfo: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Message bubble (if present)
             if let message = video.message, !message.isEmpty {
@@ -174,6 +156,16 @@ struct SlideshowPlayerView: View {
                     .foregroundStyle(.white.opacity(0.9))
                     .lineLimit(2)
             }
+            
+            // Photo count indicator
+            if let count = video.imageCount, count > 0 {
+                HStack(spacing: 4) {
+                    Image(systemName: "photo.on.rectangle")
+                    Text("\(currentImageIndex + 1)/\(count)")
+                }
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.7))
+            }
         }
         .frame(maxWidth: 250, alignment: .leading)
     }
@@ -197,68 +189,83 @@ struct SlideshowPlayerView: View {
                 .foregroundStyle(.white)
             }
             
-            // Image counter
-            VStack(spacing: 4) {
-                Image(systemName: "photo.on.rectangle")
-                    .font(.title)
-                Text("\(currentIndex + 1)/\(video.imageCount ?? video.absoluteImageURLs.count)")
-                    .font(.caption2)
+            // Save button
+            Button {
+                saveSlideshow()
+            } label: {
+                VStack(spacing: 4) {
+                    Image(systemName: "square.and.arrow.down")
+                        .font(.title)
+                    Text("Save")
+                        .font(.caption2)
+                }
+                .foregroundStyle(.white)
             }
-            .foregroundStyle(.white)
+        }
+    }
+    
+    // MARK: - Load Images
+    private func loadImages() async {
+        isLoading = true
+        
+        let urls = video.absoluteImageURLs
+        var images: [UIImage] = []
+        
+        for url in urls {
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                if let image = UIImage(data: data) {
+                    images.append(image)
+                }
+            } catch {
+                print("Failed to load image: \(error)")
+            }
+        }
+        
+        await MainActor.run {
+            loadedImages = images
+            isLoading = false
+            
+            if isActive {
+                setupAudio()
+            }
         }
     }
     
     // MARK: - Audio Setup
-    private func setupAudio() async {
-        isLoading = true
+    private func setupAudio() {
+        guard let audioURL = video.absoluteAudioURL else { return }
         
-        guard let audioURL = video.absoluteAudioURL else {
-            isLoading = false
-            return
-        }
-        
-        do {
-            // Download audio to temp file
-            let (data, _) = try await URLSession.shared.data(from: audioURL)
-            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(video.id)_audio.mp3")
-            try data.write(to: tempURL)
-            
-            await MainActor.run {
-                do {
-                    audioPlayer = try AVAudioPlayer(contentsOf: tempURL)
-                    audioPlayer?.numberOfLoops = -1 // Loop indefinitely
-                    audioPlayer?.prepareToPlay()
-                    
-                    if isActive {
+        Task {
+            do {
+                let (data, _) = try await URLSession.shared.data(from: audioURL)
+                
+                await MainActor.run {
+                    do {
+                        audioPlayer = try AVAudioPlayer(data: data)
+                        audioPlayer?.numberOfLoops = -1 // Loop indefinitely
                         audioPlayer?.play()
+                    } catch {
+                        print("Failed to create audio player: \(error)")
                     }
-                } catch {
-                    print("Failed to create audio player: \(error)")
                 }
-                isLoading = false
-            }
-        } catch {
-            print("Failed to download audio: \(error)")
-            await MainActor.run {
-                isLoading = false
+            } catch {
+                print("Failed to download audio: \(error)")
             }
         }
-    }
-    
-    private func cleanupAudio() {
-        audioPlayer?.stop()
-        audioPlayer = nil
     }
     
     private func handleActiveChange(_ isActive: Bool) {
         if isActive {
-            audioPlayer?.play()
+            currentImageIndex = 0
+            setupAudio()
         } else {
-            audioPlayer?.pause()
+            audioPlayer?.stop()
+            audioPlayer = nil
         }
     }
     
-    // MARK: - Gestures
+    // MARK: - Gestures & Actions
     private func doubleTapLike(in geometry: GeometryProxy) {
         heartAnimationPosition = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
         showHeartAnimation = true
@@ -277,6 +284,16 @@ struct SlideshowPlayerView: View {
     private func toggleLike() {
         isLiked.toggle()
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+        impactFeedback.impactOccurred()
+    }
+    
+    private func saveSlideshow() {
+        // Save all images to photo library
+        for image in loadedImages {
+            UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+        }
+        
+        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
         impactFeedback.impactOccurred()
     }
 }
