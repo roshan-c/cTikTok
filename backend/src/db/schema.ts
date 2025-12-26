@@ -10,15 +10,20 @@ export const users = sqliteTable('users', {
     .$defaultFn(() => new Date()),
 });
 
-// Videos table
+// Videos table (also used for slideshows)
 export const videos = sqliteTable('videos', {
   id: text('id').primaryKey(),
   senderId: text('sender_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   originalUrl: text('original_url').notNull(),
-  filePath: text('file_path').notNull(),
+  mediaType: text('media_type', { enum: ['video', 'slideshow'] })
+    .notNull()
+    .default('video'),
+  filePath: text('file_path').notNull(), // For videos: the mp4 file. For slideshows: empty or first image
   thumbnailPath: text('thumbnail_path'),
+  images: text('images'), // JSON array of image paths (for slideshows)
+  audioPath: text('audio_path'), // Audio file path (for slideshows)
   durationSeconds: integer('duration_seconds'),
   fileSizeBytes: integer('file_size_bytes'),
   tiktokAuthor: text('tiktok_author'),

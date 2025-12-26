@@ -40,11 +40,21 @@ struct VideoFeedView: View {
         ScrollView(.vertical) {
             LazyVStack(spacing: 0) {
                 ForEach(viewModel.videos) { video in
-                    VideoPlayerView(
-                        video: video,
-                        isActive: viewModel.isActive(video),
-                        viewModel: viewModel
-                    )
+                    Group {
+                        if video.isSlideshow {
+                            SlideshowPlayerView(
+                                video: video,
+                                isActive: viewModel.isActive(video),
+                                viewModel: viewModel
+                            )
+                        } else {
+                            VideoPlayerView(
+                                video: video,
+                                isActive: viewModel.isActive(video),
+                                viewModel: viewModel
+                            )
+                        }
+                    }
                     .containerRelativeFrame([.horizontal, .vertical])
                     .id(video.id)
                 }

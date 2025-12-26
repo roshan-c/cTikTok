@@ -10,6 +10,7 @@ import { authMiddleware } from '../middleware/auth';
 import { config } from '../utils/config';
 import { downloadTikTokVideo, isValidTikTokUrl, cleanupTempFile } from '../services/tiktok';
 import { transcodeVideo } from '../services/transcoder';
+import { processSlideshow, getSlideshowSize } from '../services/slideshow';
 
 const videosRoute = new Hono();
 
@@ -30,7 +31,7 @@ videosRoute.get('/:id/stream', async (c) => {
     where: eq(videos.id, videoId),
   });
 
-  if (!video || video.status !== 'ready') {
+  if (!video || video.status !== 'ready' || video.mediaType !== 'video') {
     return c.json({ error: 'Video not found or not ready' }, 404);
   }
 
@@ -97,6 +98,76 @@ videosRoute.get('/:id/thumbnail', async (c) => {
   });
 });
 
+// Get slideshow image (public)
+videosRoute.get('/:id/image/:index', async (c) => {
+  const videoId = c.req.param('id');
+  const indexStr = c.req.param('index');
+  const index = parseInt(indexStr, 10);
+
+  const video = await db.query.videos.findFirst({
+    where: eq(videos.id, videoId),
+  });
+
+  if (!video || video.status !== 'ready' || video.mediaType !== 'slideshow') {
+    return c.json({ error: 'Slideshow not found or not ready' }, 404);
+  }
+
+  if (!video.images) {
+    return c.json({ error: 'No images found' }, 404);
+  }
+
+  const imagePaths: string[] = JSON.parse(video.images);
+  
+  if (index < 0 || index >= imagePaths.length) {
+    return c.json({ error: 'Image index out of range' }, 404);
+  }
+
+  const imagePath = imagePaths[index];
+  
+  if (!existsSync(imagePath)) {
+    return c.json({ error: 'Image file not found' }, 404);
+  }
+
+  const stream = createReadStream(imagePath);
+
+  return new Response(stream as unknown as ReadableStream, {
+    status: 200,
+    headers: {
+      'Content-Type': 'image/jpeg',
+      'Cache-Control': 'public, max-age=86400',
+    },
+  });
+});
+
+// Get slideshow audio (public)
+videosRoute.get('/:id/audio', async (c) => {
+  const videoId = c.req.param('id');
+
+  const video = await db.query.videos.findFirst({
+    where: eq(videos.id, videoId),
+  });
+
+  if (!video || video.status !== 'ready' || video.mediaType !== 'slideshow') {
+    return c.json({ error: 'Slideshow not found or not ready' }, 404);
+  }
+
+  if (!video.audioPath || !existsSync(video.audioPath)) {
+    return c.json({ error: 'Audio not found' }, 404);
+  }
+
+  const stats = await stat(video.audioPath);
+  const stream = createReadStream(video.audioPath);
+
+  return new Response(stream as unknown as ReadableStream, {
+    status: 200,
+    headers: {
+      'Content-Type': 'audio/mpeg',
+      'Content-Length': stats.size.toString(),
+      'Cache-Control': 'public, max-age=86400',
+    },
+  });
+});
+
 // ============================================
 // PROTECTED ROUTES (auth required)
 // ============================================
@@ -136,7 +207,7 @@ videosRoute.post('/', async (c) => {
   });
 
   // Process video in background
-  processVideo(videoId, url).catch(console.error);
+  processContent(videoId, url).catch(console.error);
 
   return c.json({
     message: 'Video submitted for processing',
@@ -144,15 +215,15 @@ videosRoute.post('/', async (c) => {
   }, 202);
 });
 
-// Background video processing
-async function processVideo(videoId: string, url: string): Promise<void> {
-  console.log(`[Process] Starting video ${videoId}`);
+// Background content processing (video or slideshow)
+async function processContent(videoId: string, url: string): Promise<void> {
+  console.log(`[Process] Starting content ${videoId}`);
 
   try {
     // Download
     const downloadResult = await downloadTikTokVideo(url);
 
-    if (!downloadResult.success || !downloadResult.filePath) {
+    if (!downloadResult.success) {
       await db
         .update(videos)
         .set({
@@ -163,7 +234,75 @@ async function processVideo(videoId: string, url: string): Promise<void> {
       return;
     }
 
-    // Transcode
+    // Handle slideshow
+    if (downloadResult.mediaType === 'slideshow') {
+      if (!downloadResult.imagePaths || downloadResult.imagePaths.length === 0) {
+        await db
+          .update(videos)
+          .set({
+            status: 'failed',
+            errorMessage: 'No images downloaded',
+          })
+          .where(eq(videos.id, videoId));
+        return;
+      }
+
+      const slideshowResult = await processSlideshow(
+        downloadResult.imagePaths,
+        downloadResult.audioPath,
+        videoId
+      );
+
+      if (!slideshowResult.success) {
+        await db
+          .update(videos)
+          .set({
+            status: 'failed',
+            errorMessage: slideshowResult.error || 'Slideshow processing failed',
+          })
+          .where(eq(videos.id, videoId));
+        return;
+      }
+
+      // Get total file size
+      const fileSizeBytes = await getSlideshowSize(
+        downloadResult.imagePaths,
+        downloadResult.audioPath
+      );
+
+      // Update record for slideshow
+      await db
+        .update(videos)
+        .set({
+          status: 'ready',
+          mediaType: 'slideshow',
+          filePath: downloadResult.imagePaths[0], // First image as reference
+          thumbnailPath: slideshowResult.thumbnailPath,
+          images: JSON.stringify(downloadResult.imagePaths),
+          audioPath: downloadResult.audioPath || null,
+          fileSizeBytes,
+          tiktokAuthor: downloadResult.author,
+          tiktokDescription: downloadResult.description,
+        })
+        .where(eq(videos.id, videoId));
+
+      console.log(`[Process] Slideshow ${videoId} ready with ${downloadResult.imagePaths.length} images`);
+      return;
+    }
+
+    // Handle video
+    if (!downloadResult.filePath) {
+      await db
+        .update(videos)
+        .set({
+          status: 'failed',
+          errorMessage: 'No video file downloaded',
+        })
+        .where(eq(videos.id, videoId));
+      return;
+    }
+
+    // Transcode video
     const transcodeResult = await transcodeVideo(downloadResult.filePath, videoId);
 
     if (!transcodeResult.success || !transcodeResult.outputPath) {
@@ -183,6 +322,7 @@ async function processVideo(videoId: string, url: string): Promise<void> {
       .update(videos)
       .set({
         status: 'ready',
+        mediaType: 'video',
         filePath: transcodeResult.outputPath,
         thumbnailPath: transcodeResult.thumbnailPath,
         durationSeconds: transcodeResult.durationSeconds,
@@ -194,7 +334,7 @@ async function processVideo(videoId: string, url: string): Promise<void> {
 
     console.log(`[Process] Video ${videoId} ready`);
   } catch (error) {
-    console.error(`[Process] Error processing video ${videoId}:`, error);
+    console.error(`[Process] Error processing content ${videoId}:`, error);
     await db
       .update(videos)
       .set({
@@ -218,7 +358,9 @@ videosRoute.get('/', async (c) => {
       id: videos.id,
       senderId: videos.senderId,
       senderUsername: users.username,
+      mediaType: videos.mediaType,
       status: videos.status,
+      images: videos.images,
       durationSeconds: videos.durationSeconds,
       fileSizeBytes: videos.fileSizeBytes,
       tiktokAuthor: videos.tiktokAuthor,
@@ -236,11 +378,38 @@ videosRoute.get('/', async (c) => {
     .orderBy(desc(videos.createdAt));
 
   return c.json({
-    videos: videoList.map(v => ({
-      ...v,
-      streamUrl: `/api/videos/${v.id}/stream`,
-      thumbnailUrl: `/api/videos/${v.id}/thumbnail`,
-    })),
+    videos: videoList.map(v => {
+      const base = {
+        id: v.id,
+        senderId: v.senderId,
+        senderUsername: v.senderUsername,
+        mediaType: v.mediaType,
+        status: v.status,
+        durationSeconds: v.durationSeconds,
+        fileSizeBytes: v.fileSizeBytes,
+        tiktokAuthor: v.tiktokAuthor,
+        tiktokDescription: v.tiktokDescription,
+        message: v.message,
+        createdAt: v.createdAt,
+        expiresAt: v.expiresAt,
+        thumbnailUrl: `/api/videos/${v.id}/thumbnail`,
+      };
+
+      if (v.mediaType === 'slideshow' && v.images) {
+        const imagePaths: string[] = JSON.parse(v.images);
+        return {
+          ...base,
+          imageCount: imagePaths.length,
+          imageUrls: imagePaths.map((_, i) => `/api/videos/${v.id}/image/${i}`),
+          audioUrl: `/api/videos/${v.id}/audio`,
+        };
+      }
+
+      return {
+        ...base,
+        streamUrl: `/api/videos/${v.id}/stream`,
+      };
+    }),
   });
 });
 
@@ -287,10 +456,11 @@ videosRoute.get('/:id', async (c) => {
     where: eq(users.id, video.senderId),
   });
 
-  return c.json({
+  const base = {
     id: video.id,
     senderId: video.senderId,
     senderUsername: sender?.username,
+    mediaType: video.mediaType,
     status: video.status,
     durationSeconds: video.durationSeconds,
     fileSizeBytes: video.fileSizeBytes,
@@ -299,8 +469,22 @@ videosRoute.get('/:id', async (c) => {
     message: video.message,
     createdAt: video.createdAt,
     expiresAt: video.expiresAt,
-    streamUrl: `/api/videos/${video.id}/stream`,
     thumbnailUrl: `/api/videos/${video.id}/thumbnail`,
+  };
+
+  if (video.mediaType === 'slideshow' && video.images) {
+    const imagePaths: string[] = JSON.parse(video.images);
+    return c.json({
+      ...base,
+      imageCount: imagePaths.length,
+      imageUrls: imagePaths.map((_, i) => `/api/videos/${video.id}/image/${i}`),
+      audioUrl: `/api/videos/${video.id}/audio`,
+    });
+  }
+
+  return c.json({
+    ...base,
+    streamUrl: `/api/videos/${video.id}/stream`,
   });
 });
 
@@ -321,14 +505,27 @@ videosRoute.delete('/:id', async (c) => {
     return c.json({ error: 'Not authorized to delete this video' }, 403);
   }
 
-  // Delete files
-  if (video.filePath && existsSync(video.filePath)) {
-    const { unlink } = await import('fs/promises');
-    await unlink(video.filePath).catch(() => {});
-  }
-  if (video.thumbnailPath && existsSync(video.thumbnailPath)) {
-    const { unlink } = await import('fs/promises');
-    await unlink(video.thumbnailPath).catch(() => {});
+  const { unlink, rm } = await import('fs/promises');
+  const { dirname } = await import('path');
+
+  // Delete files based on media type
+  if (video.mediaType === 'slideshow') {
+    // Delete slideshow directory
+    if (video.images) {
+      const imagePaths: string[] = JSON.parse(video.images);
+      if (imagePaths.length > 0) {
+        const slideshowDir = dirname(imagePaths[0]);
+        await rm(slideshowDir, { recursive: true, force: true }).catch(() => {});
+      }
+    }
+  } else {
+    // Delete video file
+    if (video.filePath && existsSync(video.filePath)) {
+      await unlink(video.filePath).catch(() => {});
+    }
+    if (video.thumbnailPath && existsSync(video.thumbnailPath)) {
+      await unlink(video.thumbnailPath).catch(() => {});
+    }
   }
 
   // Delete from database

@@ -13,11 +13,25 @@ struct AuthResponse: Codable {
     let user: User
 }
 
-// MARK: - Video
+// MARK: - Media Type
+enum MediaType: String, Codable {
+    case video
+    case slideshow
+}
+
+// MARK: - Video Status
+enum VideoStatus: String, Codable {
+    case processing
+    case ready
+    case failed
+}
+
+// MARK: - Video (also represents slideshows)
 struct Video: Codable, Identifiable {
     let id: String
     let senderId: String
     let senderUsername: String?
+    let mediaType: MediaType
     let status: VideoStatus
     let durationSeconds: Int?
     let fileSizeBytes: Int?
@@ -26,22 +40,38 @@ struct Video: Codable, Identifiable {
     let message: String?
     let createdAt: Date
     let expiresAt: Date
-    let streamUrl: String
     let thumbnailUrl: String
     
+    // Video-specific
+    let streamUrl: String?
+    
+    // Slideshow-specific
+    let imageCount: Int?
+    let imageUrls: [String]?
+    let audioUrl: String?
+    
+    var isSlideshow: Bool {
+        mediaType == .slideshow
+    }
+    
     var absoluteStreamURL: URL? {
-        URL(string: "\(AppConfig.apiBaseURL)\(streamUrl)")
+        guard let streamUrl = streamUrl else { return nil }
+        return URL(string: "\(AppConfig.apiBaseURL)\(streamUrl)")
     }
     
     var absoluteThumbnailURL: URL? {
         URL(string: "\(AppConfig.apiBaseURL)\(thumbnailUrl)")
     }
-}
-
-enum VideoStatus: String, Codable {
-    case processing
-    case ready
-    case failed
+    
+    var absoluteImageURLs: [URL] {
+        guard let imageUrls = imageUrls else { return [] }
+        return imageUrls.compactMap { URL(string: "\(AppConfig.apiBaseURL)\($0)") }
+    }
+    
+    var absoluteAudioURL: URL? {
+        guard let audioUrl = audioUrl else { return nil }
+        return URL(string: "\(AppConfig.apiBaseURL)\(audioUrl)")
+    }
 }
 
 // MARK: - Video List Response
@@ -79,10 +109,11 @@ struct ErrorDetails: Codable {
 // MARK: - Custom Date Decoding
 extension Video {
     enum CodingKeys: String, CodingKey {
-        case id, senderId, senderUsername, status
+        case id, senderId, senderUsername, mediaType, status
         case durationSeconds, fileSizeBytes
         case tiktokAuthor, tiktokDescription, message
         case createdAt, expiresAt
-        case streamUrl, thumbnailUrl
+        case thumbnailUrl, streamUrl
+        case imageCount, imageUrls, audioUrl
     }
 }
