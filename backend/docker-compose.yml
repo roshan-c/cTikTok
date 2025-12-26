@@ -12,8 +12,11 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      - ctiktok
+      ctiktok:
+        condition: service_healthy
     restart: unless-stopped
+    networks:
+      - ctiktok_network
 
   # cTikTok Backend
   ctiktok:
@@ -31,10 +34,17 @@ services:
       - VIDEOS_PATH=/app/videos
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ctiktok_network
+
+networks:
+  ctiktok_network:
+    driver: bridge
 
 volumes:
   caddy_data:
