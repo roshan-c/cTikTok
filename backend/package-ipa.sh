@@ -5,7 +5,7 @@
 set -e
 
 APP_PATH="$1"
-VERSION="${2:-1.0.0}"
+VERSION="${2:-1.0}"
 DESCRIPTION="${3:-Bug fixes and improvements}"
 
 if [ -z "$APP_PATH" ]; then
