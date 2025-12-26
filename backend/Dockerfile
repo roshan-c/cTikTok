@@ -16,7 +16,7 @@ RUN bun install --frozen-lockfile || bun install
 COPY . .
 
 # Create directories
-RUN mkdir -p data videos
+RUN mkdir -p data videos altstore
 
 # Expose port
 EXPOSE 3000
