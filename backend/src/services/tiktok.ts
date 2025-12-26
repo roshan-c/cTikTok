@@ -73,7 +73,8 @@ async function downloadFile(url: string, outputPath: string): Promise<boolean> {
 // Download video using @tobyg74/tiktok-api-dl
 async function downloadWithLibrary(url: string): Promise<DownloadResult> {
   try {
-    const result = await TiktokDL.Downloader(url, { version: 'v3' });
+    // Use v1 as it returns complete data including music for slideshows
+    const result = await TiktokDL.Downloader(url, { version: 'v1' });
     
     if (result.status !== 'success' || !result.result) {
       return { success: false, mediaType: 'video', error: result.message || 'Failed to fetch content info' };
@@ -87,8 +88,6 @@ async function downloadWithLibrary(url: string): Promise<DownloadResult> {
     // Handle slideshow (image type)
     if (contentType === 'image' && result.result.images && result.result.images.length > 0) {
       console.log(`[TikTok] Detected slideshow with ${result.result.images.length} images`);
-      console.log(`[TikTok] Music data:`, JSON.stringify(result.result.music));
-      console.log(`[TikTok] Full result keys:`, Object.keys(result.result));
       
       const slideshowId = generateVideoId();
       const slideshowDir = join(config.VIDEOS_PATH, `slideshow_${slideshowId}`);
