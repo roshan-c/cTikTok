@@ -1,6 +1,7 @@
 import SwiftUI
 import BackgroundTasks
 import UserNotifications
+import AVFoundation
 
 @main
 struct cTikTokApp: App {
@@ -20,6 +21,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        // Configure audio session to play sound even when silent switch is on
+        configureAudioSession()
+        
         // Register background tasks
         BGTaskScheduler.shared.register(
             forTaskWithIdentifier: AppConfig.backgroundTaskIdentifier,
@@ -37,6 +41,18 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         }
         
         return true
+    }
+    
+    // MARK: - Audio Session Configuration
+    private func configureAudioSession() {
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            // .playback category ignores the silent switch
+            try audioSession.setCategory(.playback, mode: .moviePlayback)
+            try audioSession.setActive(true)
+        } catch {
+            print("Failed to configure audio session: \(error)")
+        }
     }
     
     // MARK: - Background Refresh

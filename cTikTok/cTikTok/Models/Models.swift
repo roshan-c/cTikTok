@@ -23,6 +23,7 @@ struct Video: Codable, Identifiable {
     let fileSizeBytes: Int?
     let tiktokAuthor: String?
     let tiktokDescription: String?
+    let message: String?
     let createdAt: Date
     let expiresAt: Date
     let streamUrl: String
@@ -80,7 +81,7 @@ extension Video {
     enum CodingKeys: String, CodingKey {
         case id, senderId, senderUsername, status
         case durationSeconds, fileSizeBytes
-        case tiktokAuthor, tiktokDescription
+        case tiktokAuthor, tiktokDescription, message
         case createdAt, expiresAt
         case streamUrl, thumbnailUrl
     }

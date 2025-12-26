@@ -23,6 +23,7 @@ export const videos = sqliteTable('videos', {
   fileSizeBytes: integer('file_size_bytes'),
   tiktokAuthor: text('tiktok_author'),
   tiktokDescription: text('tiktok_description'),
+  message: text('message'), // Short message from sender (max 30 chars)
   status: text('status', { enum: ['processing', 'ready', 'failed'] })
     .notNull()
     .default('processing'),

@@ -8,6 +8,13 @@
       "when": 1766764359751,
       "tag": "0000_strong_golden_guardian",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1766769855643,
+      "tag": "0001_far_molly_hayes",
+      "breakpoints": true
     }
   ]
 }

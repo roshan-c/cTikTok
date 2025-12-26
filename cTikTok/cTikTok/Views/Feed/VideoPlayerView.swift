@@ -8,45 +8,74 @@ struct VideoPlayerView: View {
     
     @State private var player: AVPlayer?
     @State private var isLoading = true
-    @State private var showReplay = false
+    @State private var isLiked = false
+    @State private var showHeartAnimation = false
+    @State private var heartAnimationPosition: CGPoint = .zero
+    @State private var progress: Double = 0
+    @State private var duration: Double = 1
+    @State private var isSpedUp = false
+    @State private var timeObserver: Any?
+    @State private var observerPlayer: AVPlayer?  // Track which player owns the observer
     
     var body: some View {
-        ZStack {
-            Color.black
-            
-            if let player = player {
-                VideoPlayer(player: player)
-                    .disabled(true) // Disable default controls
-                    .onTapGesture {
-                        togglePlayback()
+        GeometryReader { geometry in
+            ZStack {
+                Color.black
+                
+                // Video Player with gesture overlay
+                if let player = player {
+                    ZStack {
+                        CustomVideoPlayer(player: player)
+                        
+                        // Gesture overlay for tap interactions
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .gesture(
+                                TapGesture(count: 2)
+                                    .onEnded {
+                                        doubleTapLike(in: geometry)
+                                    }
+                            )
+                            .simultaneousGesture(
+                                TapGesture(count: 1)
+                                    .onEnded {
+                                        togglePlayback()
+                                    }
+                            )
                     }
-            }
-            
-            if isLoading {
-                ProgressView()
-                    .tint(.white)
-            }
-            
-            if showReplay {
-                Button {
-                    replayVideo()
-                } label: {
-                    Image(systemName: "arrow.counterclockwise.circle.fill")
-                        .font(.system(size: 60))
-                        .foregroundStyle(.white.opacity(0.8))
                 }
-            }
-            
-            // Video Info Overlay
-            VStack {
-                Spacer()
-                HStack(alignment: .bottom) {
-                    videoInfo
+                
+                // Loading indicator
+                if isLoading {
+                    ProgressView()
+                        .tint(.white)
+                }
+                
+                // Heart animation overlay
+                if showHeartAnimation {
+                    HeartAnimationView()
+                        .position(heartAnimationPosition)
+                }
+                
+
+                
+                // Video Info Overlay
+                VStack {
                     Spacer()
-                    sideActions
+                    
+                    HStack(alignment: .bottom) {
+                        videoInfo
+                        Spacer()
+                        sideActions
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 12)
+                    
+                    // Progress bar at the very bottom
+                    ProgressBar(progress: progress)
+                        .padding(.horizontal, 8)
+                        .padding(.bottom, 34)
                 }
-                .padding()
-                .padding(.bottom, 40)
             }
         }
         .task {
@@ -56,13 +85,71 @@ struct VideoPlayerView: View {
             handleActiveChange(newValue)
         }
         .onDisappear {
-            player?.pause()
+            cleanupPlayer()
+        }
+    }
+    
+    // MARK: - Progress Bar
+    struct ProgressBar: View {
+        let progress: Double
+        
+        var body: some View {
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Rectangle()
+                        .fill(Color.white.opacity(0.3))
+                        .frame(height: 3)
+                    
+                    Rectangle()
+                        .fill(Color.white)
+                        .frame(width: geometry.size.width * CGFloat(min(max(progress, 0), 1)), height: 3)
+                }
+            }
+            .frame(height: 3)
+            .clipShape(Capsule())
+        }
+    }
+    
+    // MARK: - Heart Animation
+    struct HeartAnimationView: View {
+        @State private var scale: CGFloat = 0
+        @State private var opacity: Double = 1
+        
+        var body: some View {
+            Image(systemName: "heart.fill")
+                .font(.system(size: 100))
+                .foregroundStyle(.red)
+                .shadow(color: .black.opacity(0.3), radius: 10)
+                .scaleEffect(scale)
+                .opacity(opacity)
+                .onAppear {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        scale = 1.2
+                    }
+                    withAnimation(.easeOut(duration: 0.3).delay(0.2)) {
+                        scale = 1.0
+                    }
+                    withAnimation(.easeOut(duration: 0.4).delay(0.6)) {
+                        opacity = 0
+                    }
+                }
         }
     }
     
     // MARK: - Video Info
     private var videoInfo: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // Message bubble (if present)
+            if let message = video.message, !message.isEmpty {
+                Text(message)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            
             if let sender = video.senderUsername {
                 Text("@\(sender)")
                     .font(.headline)
@@ -92,13 +179,32 @@ struct VideoPlayerView: View {
     // MARK: - Side Actions
     private var sideActions: some View {
         VStack(spacing: 20) {
-            // Like button (visual only for now)
+            // Speed button
             Button {
-                // Future: implement likes
+                toggleSpeed()
             } label: {
                 VStack(spacing: 4) {
-                    Image(systemName: "heart.fill")
+                    Image(systemName: isSpedUp ? "gauge.with.dots.needle.67percent" : "gauge.with.dots.needle.33percent")
                         .font(.title)
+                        .foregroundStyle(isSpedUp ? .yellow : .white)
+                        .scaleEffect(isSpedUp ? 1.1 : 1.0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isSpedUp)
+                    Text(isSpedUp ? "2x" : "1x")
+                        .font(.caption2)
+                }
+                .foregroundStyle(.white)
+            }
+            
+            // Like button
+            Button {
+                toggleLike()
+            } label: {
+                VStack(spacing: 4) {
+                    Image(systemName: isLiked ? "heart.fill" : "heart")
+                        .font(.title)
+                        .foregroundStyle(isLiked ? .red : .white)
+                        .scaleEffect(isLiked ? 1.1 : 1.0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isLiked)
                     Text("Like")
                         .font(.caption2)
                 }
@@ -126,18 +232,15 @@ struct VideoPlayerView: View {
         
         let newPlayer = await viewModel.getPlayer(for: video)
         
-        // Setup looping
-        NotificationCenter.default.addObserver(
-            forName: .AVPlayerItemDidPlayToEndTime,
-            object: newPlayer.currentItem,
-            queue: .main
-        ) { _ in
-            showReplay = true
-        }
-        
         await MainActor.run {
             self.player = newPlayer
             self.isLoading = false
+            
+            // Setup time observer for progress
+            setupTimeObserver(for: newPlayer)
+            
+            // Setup looping notification
+            setupLooping(for: newPlayer)
             
             if isActive {
                 newPlayer.seek(to: .zero)
@@ -146,38 +249,114 @@ struct VideoPlayerView: View {
         }
     }
     
+    private func setupTimeObserver(for player: AVPlayer) {
+        // Remove existing observer from the correct player
+        if let observer = timeObserver, let oldPlayer = observerPlayer {
+            oldPlayer.removeTimeObserver(observer)
+            timeObserver = nil
+            observerPlayer = nil
+        }
+        
+        // Add periodic time observer
+        let interval = CMTime(seconds: 0.1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        timeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { time in
+            guard let item = player.currentItem else { return }
+            let currentTime = CMTimeGetSeconds(time)
+            let totalDuration = CMTimeGetSeconds(item.duration)
+            
+            if totalDuration.isFinite && totalDuration > 0 {
+                self.duration = totalDuration
+                self.progress = currentTime / totalDuration
+            }
+        }
+        observerPlayer = player
+    }
+    
+    private func setupLooping(for player: AVPlayer) {
+        NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: player.currentItem,
+            queue: .main
+        ) { _ in
+            // Auto-loop: seek to beginning and continue playing
+            player.seek(to: .zero)
+            player.play()
+        }
+    }
+    
+    private func cleanupPlayer() {
+        // Remove observer from the correct player instance
+        if let observer = timeObserver, let oldPlayer = observerPlayer {
+            oldPlayer.removeTimeObserver(observer)
+        }
+        player?.pause()
+        timeObserver = nil
+        observerPlayer = nil
+    }
+    
     private func handleActiveChange(_ isActive: Bool) {
         if isActive {
-            showReplay = false
             player?.seek(to: .zero)
             player?.play()
         } else {
             player?.pause()
+            // Reset speed when leaving video
+            if isSpedUp {
+                isSpedUp = false
+            }
         }
     }
     
+    // MARK: - Gestures
     private func togglePlayback() {
         guard let player = player else { return }
         
         if player.timeControlStatus == .playing {
             player.pause()
         } else {
-            if showReplay {
-                replayVideo()
-            } else {
-                player.play()
-            }
+            player.play()
         }
     }
     
-    private func replayVideo() {
-        showReplay = false
-        player?.seek(to: .zero)
-        player?.play()
+    private func doubleTapLike(in geometry: GeometryProxy) {
+        // Show heart animation at center
+        heartAnimationPosition = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
+        showHeartAnimation = true
+        
+        // Set liked state
+        if !isLiked {
+            isLiked = true
+            // Haptic feedback
+            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+            impactFeedback.impactOccurred()
+        }
+        
+        // Hide animation after delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            showHeartAnimation = false
+        }
+    }
+    
+    private func toggleLike() {
+        isLiked.toggle()
+        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+        impactFeedback.impactOccurred()
+    }
+    
+    private func toggleSpeed() {
+        isSpedUp.toggle()
+        if isSpedUp {
+            player?.rate = 2.0
+        } else {
+            if player?.timeControlStatus == .playing {
+                player?.rate = 1.0
+            }
+        }
+        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+        impactFeedback.impactOccurred()
     }
     
     private func shareVideo() {
-        // Save to camera roll functionality
         guard let url = video.absoluteStreamURL else { return }
         
         Task {
@@ -200,5 +379,22 @@ struct VideoPlayerView: View {
                 print("Failed to share video: \(error)")
             }
         }
+    }
+}
+
+// MARK: - Custom Video Player (without default controls)
+struct CustomVideoPlayer: UIViewControllerRepresentable {
+    let player: AVPlayer
+    
+    func makeUIViewController(context: Context) -> AVPlayerViewController {
+        let controller = AVPlayerViewController()
+        controller.player = player
+        controller.showsPlaybackControls = false
+        controller.videoGravity = .resizeAspectFill
+        return controller
+    }
+    
+    func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
+        uiViewController.player = player
     }
 }

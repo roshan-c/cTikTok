@@ -43,6 +43,27 @@ struct SendVideoView: View {
                 }
                 .padding(.horizontal)
                 
+                // Message Input
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Add a message (optional)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    
+                    TextField("Max 30 characters", text: $viewModel.message)
+                        .textFieldStyle(.roundedBorder)
+                        .onChange(of: viewModel.message) { _, newValue in
+                            if newValue.count > 30 {
+                                viewModel.message = String(newValue.prefix(30))
+                            }
+                        }
+                    
+                    Text("\(viewModel.message.count)/30")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+                .padding(.horizontal)
+                
                 // Status
                 if viewModel.showSuccess {
                     HStack {

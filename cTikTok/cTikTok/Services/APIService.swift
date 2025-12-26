@@ -148,11 +148,15 @@ final class APIService: ObservableObject {
         return response.videos
     }
     
-    func submitVideo(url: String) async throws -> VideoSubmitResponse {
-        try await request(
+    func submitVideo(url: String, message: String? = nil) async throws -> VideoSubmitResponse {
+        var body: [String: Any] = ["url": url]
+        if let message = message, !message.isEmpty {
+            body["message"] = message
+        }
+        return try await request(
             endpoint: "/api/videos",
             method: "POST",
-            body: ["url": url]
+            body: body
         )
     }
     

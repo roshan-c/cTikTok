@@ -15,6 +15,7 @@ const videosRoute = new Hono();
 
 const submitSchema = z.object({
   url: z.string().url(),
+  message: z.string().max(30).optional(),
 });
 
 // ============================================
@@ -113,7 +114,7 @@ videosRoute.post('/', async (c) => {
     return c.json({ error: 'Invalid input', details: parsed.error.flatten() }, 400);
   }
 
-  const { url } = parsed.data;
+  const { url, message } = parsed.data;
 
   if (!isValidTikTokUrl(url)) {
     return c.json({ error: 'Invalid TikTok URL' }, 400);
@@ -129,6 +130,7 @@ videosRoute.post('/', async (c) => {
     senderId: user.userId,
     originalUrl: url,
     filePath: '', // Will be updated after processing
+    message: message || null,
     status: 'processing',
     expiresAt,
   });
@@ -221,6 +223,7 @@ videosRoute.get('/', async (c) => {
       fileSizeBytes: videos.fileSizeBytes,
       tiktokAuthor: videos.tiktokAuthor,
       tiktokDescription: videos.tiktokDescription,
+      message: videos.message,
       createdAt: videos.createdAt,
       expiresAt: videos.expiresAt,
     })
@@ -293,6 +296,7 @@ videosRoute.get('/:id', async (c) => {
     fileSizeBytes: video.fileSizeBytes,
     tiktokAuthor: video.tiktokAuthor,
     tiktokDescription: video.tiktokDescription,
+    message: video.message,
     createdAt: video.createdAt,
     expiresAt: video.expiresAt,
     streamUrl: `/api/videos/${video.id}/stream`,

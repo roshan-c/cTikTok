@@ -3,6 +3,7 @@ import Foundation
 @MainActor
 final class SendVideoViewModel: ObservableObject {
     @Published var tiktokURL: String = ""
+    @Published var message: String = ""
     @Published var isSubmitting = false
     @Published var showSuccess = false
     @Published var errorMessage: String?
@@ -23,9 +24,11 @@ final class SendVideoViewModel: ObservableObject {
         errorMessage = nil
         
         do {
-            _ = try await APIService.shared.submitVideo(url: tiktokURL)
+            let messageToSend = message.isEmpty ? nil : message
+            _ = try await APIService.shared.submitVideo(url: tiktokURL, message: messageToSend)
             showSuccess = true
             tiktokURL = ""
+            message = ""
             
             // Auto-dismiss success after delay
             try? await Task.sleep(for: .seconds(2))
@@ -41,6 +44,7 @@ final class SendVideoViewModel: ObservableObject {
     
     func reset() {
         tiktokURL = ""
+        message = ""
         isSubmitting = false
         showSuccess = false
         errorMessage = nil
