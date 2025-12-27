@@ -3,7 +3,7 @@ import { Database } from 'bun:sqlite';
 import { config } from './utils/config';
 import { startCleanupScheduler } from './services/cleanup';
 
-console.log('[Startup] Beginning server initialization...');
+console.log('[Startup] Beginning server initialization v2...');
 
 // Ensure directories exist
 mkdirSync(config.VIDEOS_PATH, { recursive: true });
