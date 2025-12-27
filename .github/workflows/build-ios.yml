@@ -121,29 +121,30 @@ jobs:
           cp build/cTikTok.ipa backend/altstore/cTikTok.ipa
           ls -la backend/altstore/
 
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Upload IPA and source.json to VPS
+        run: |
+          scp -i ~/.ssh/deploy_key \
+            backend/altstore/cTikTok.ipa \
+            backend/altstore/source.json \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:~/ctiktok/backend/altstore/
+
       - name: Deploy to VPS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             cd ~/ctiktok
             git pull origin main
             cd backend
             docker compose down
             docker compose up -d --build
-            echo "iOS app v${{ steps.version.outputs.version }} deployed!"
-
-      - name: Upload IPA and source.json to VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          source: "backend/altstore/cTikTok.ipa,backend/altstore/source.json"
-          target: "~/ctiktok"
-          strip_components: 0
+            echo "iOS app deployed!"
+          EOF
 
       - name: Commit version bump
         run: |
