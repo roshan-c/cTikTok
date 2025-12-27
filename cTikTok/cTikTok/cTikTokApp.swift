@@ -3,6 +3,12 @@ import BackgroundTasks
 import UserNotifications
 import AVFoundation
 
+/**
+ * cTikTokApp is the main entry point for the app.
+ * It is the root view controller and the main window.
+ * It is responsible for configuring the app and the app delegate.
+ */
+
 @main
 struct cTikTokApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate

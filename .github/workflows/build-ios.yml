@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'cTikTok/**'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -24,8 +25,8 @@ jobs:
       - name: Get current version and increment
         id: version
         run: |
-          # Read current version from source.json
-          CURRENT_VERSION=$(cat backend/altstore/source.json | grep '"version"' | head -1 | sed 's/.*: *"\([^"]*\)".*/\1/')
+          # Read current version from source.json using Ruby for reliable parsing
+          CURRENT_VERSION=$(ruby -rjson -e 'puts JSON.parse(File.read("backend/altstore/source.json"))["apps"][0]["version"]')
           echo "Current version: $CURRENT_VERSION"
           
           # Increment version (1.0 -> 1.1, 1.9 -> 1.10, etc.)
@@ -38,21 +39,24 @@ jobs:
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "build_number=$NEW_MINOR" >> $GITHUB_OUTPUT
 
-      - name: Update Info.plist version
+      - name: Update Info.plist versions
         run: |
-          # Update CFBundleShortVersionString (display version)
-          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${{ steps.version.outputs.version }}" cTikTok/cTikTok/Info.plist
+          VERSION="${{ steps.version.outputs.version }}"
+          BUILD="${{ steps.version.outputs.build_number }}"
           
-          # Update CFBundleVersion (build number)
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${{ steps.version.outputs.build_number }}" cTikTok/cTikTok/Info.plist
+          # Update Main App
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" cTikTok/cTikTok/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" cTikTok/cTikTok/Info.plist
           
-          echo "Updated Info.plist:"
-          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" cTikTok/cTikTok/Info.plist
-          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" cTikTok/cTikTok/Info.plist
+          # Update Share Extension
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" cTikTok/ShareExtension/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" cTikTok/ShareExtension/Info.plist
+          
+          echo "Updated Info.plists to version $VERSION ($BUILD)"
 
       - name: Build iOS app
+        working-directory: cTikTok
         run: |
-          cd cTikTok
           xcodebuild -project cTikTok.xcodeproj \
               -scheme cTikTok \
               -configuration Release \
@@ -68,7 +72,7 @@ jobs:
           APP_PATH="cTikTok/build/DerivedData/Build/Products/Release-iphoneos/cTikTok.app"
           
           if [ ! -d "$APP_PATH" ]; then
-            echo "Error: Build failed - cTikTok.app not found"
+            echo "Error: Build failed - cTikTok.app not found at $APP_PATH"
             exit 1
           fi
           
@@ -89,32 +93,33 @@ jobs:
           # Get commit message for version description (sanitize for JSON)
           DESCRIPTION=$(git log -1 --pretty=%B | head -1 | sed 's/"/\\"/g' | cut -c1-100)
           
-          # Generate source.json using printf to avoid heredoc indentation issues
-          printf '{
-  "name": "cTikTok",
-  "identifier": "com.roshanc.ctiktok.source",
-  "subtitle": "Share TikToks with your girlfriend",
-  "sourceURL": "https://ctiktok.roshanc.com/altstore/source.json",
-  "apps": [
-    {
-      "name": "cTikTok",
-      "bundleIdentifier": "com.roshanc.ctiktok",
-      "developerName": "Roshan",
-      "subtitle": "Share TikToks without TikTok",
-      "version": "%s",
-      "versionDate": "%s",
-      "versionDescription": "%s",
-      "downloadURL": "https://ctiktok.roshanc.com/altstore/cTikTok.ipa",
-      "localizedDescription": "A private app for sharing TikTok videos and slideshows. Features a TikTok-style vertical swipe interface, automatic video transcoding, and support for photo slideshows with audio.",
-      "iconURL": "https://ctiktok.roshanc.com/altstore/icon.png",
-      "tintColor": "E91E63",
-      "size": %s,
-      "screenshotURLs": []
-    }
-  ],
-  "news": []
-}
-' "$VERSION" "$DATE" "$DESCRIPTION" "$SIZE" > backend/altstore/source.json
+          # Generate source.json using a heredoc for safety
+          cat <<EOF > backend/altstore/source.json
+          {
+            "name": "cTikTok",
+            "identifier": "com.roshanc.ctiktok.source",
+            "subtitle": "Share TikToks with your girlfriend",
+            "sourceURL": "https://ctiktok.roshanc.com/altstore/source.json",
+            "apps": [
+              {
+                "name": "cTikTok",
+                "bundleIdentifier": "com.roshanc.ctiktok",
+                "developerName": "Roshan",
+                "subtitle": "Share TikToks without TikTok",
+                "version": "$VERSION",
+                "versionDate": "$DATE",
+                "versionDescription": "$DESCRIPTION",
+                "downloadURL": "https://ctiktok.roshanc.com/altstore/cTikTok.ipa",
+                "localizedDescription": "A private app for sharing TikTok videos and slideshows. Features a TikTok-style vertical swipe interface, automatic video transcoding, and support for photo slideshows with audio.",
+                "iconURL": "https://ctiktok.roshanc.com/altstore/icon.png",
+                "tintColor": "E91E63",
+                "size": $SIZE,
+                "screenshotURLs": []
+              }
+            ],
+            "news": []
+          }
+          EOF
           
           echo "source.json updated:"
           cat backend/altstore/source.json
@@ -123,6 +128,17 @@ jobs:
         run: |
           cp build/cTikTok.ipa backend/altstore/cTikTok.ipa
           ls -la backend/altstore/
+
+      - name: Commit version bump
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add backend/altstore/source.json cTikTok/cTikTok/Info.plist cTikTok/ShareExtension/Info.plist
+          git commit -m "Bump iOS version to ${{ steps.version.outputs.version }} [skip ci]"
+          git push
+          echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
       - name: Setup SSH key
         run: |
@@ -140,20 +156,12 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << EOF
             cd ~/ctiktok
-            git pull origin main
+            git fetch origin main
+            git reset --hard ${{ steps.commit.outputs.sha }}
             cd backend
             docker compose down
             docker compose up -d --build
-            echo "iOS app deployed!"
+            echo "iOS app deployed at commit ${{ steps.commit.outputs.sha }}!"
           EOF
-
-      - name: Commit version bump
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          git add backend/altstore/source.json cTikTok/cTikTok/Info.plist
-          git commit -m "Bump iOS version to ${{ steps.version.outputs.version }} [skip ci]"
-          git push

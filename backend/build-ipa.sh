@@ -2,6 +2,7 @@
 # build-ipa.sh - Builds the iOS app and creates an unsigned IPA for AltStore
 # Usage: ./build-ipa.sh [version] [version-description]
 
+# exit on error
 set -e
 
 VERSION="${1:-1.0.0}"
