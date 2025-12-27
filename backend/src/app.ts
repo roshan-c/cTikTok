@@ -4,19 +4,20 @@ import { logger } from 'hono/logger';
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
-import authRoutes from './routes/auth';
-import videosRoutes from './routes/videos';
-import altstoreRoutes from './routes/altstore';
 
-// Import friends routes with error handling
-let friendsRoutes: Hono | null = null;
-try {
-  const friendsModule = await import('./routes/friends');
-  friendsRoutes = friendsModule.default;
-  console.log('[App] Friends routes loaded successfully');
-} catch (error) {
-  console.error('[App] Failed to load friends routes:', error);
-}
+console.log('[App] Loading routes...');
+
+import authRoutes from './routes/auth';
+console.log('[App] Auth routes loaded');
+
+import videosRoutes from './routes/videos';
+console.log('[App] Videos routes loaded');
+
+import friendsRoutes from './routes/friends';
+console.log('[App] Friends routes loaded');
+
+import altstoreRoutes from './routes/altstore';
+console.log('[App] Altstore routes loaded');
 
 const app = new Hono();
 
@@ -47,15 +48,12 @@ app.get('/', async (c) => {
 app.get('/health', (c) => c.json({ status: 'healthy' }));
 
 // Routes
+console.log('[App] Registering routes...');
 app.route('/api/auth', authRoutes);
 app.route('/api/videos', videosRoutes);
-if (friendsRoutes) {
-  app.route('/api/friends', friendsRoutes);
-  console.log('[App] Friends routes registered at /api/friends');
-} else {
-  console.error('[App] Friends routes NOT registered - routes failed to load');
-}
+app.route('/api/friends', friendsRoutes);
 app.route('/altstore', altstoreRoutes);
+console.log('[App] All routes registered');
 
 // 404 handler
 app.notFound((c) => c.json({ error: 'Not found' }, 404));

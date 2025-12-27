@@ -3,7 +3,7 @@ import { Database } from 'bun:sqlite';
 import { config } from './utils/config';
 import { startCleanupScheduler } from './services/cleanup';
 
-console.log('[Startup] Beginning server initialization v2...');
+console.log('[Startup] Beginning server initialization...');
 
 // Ensure directories exist
 mkdirSync(config.VIDEOS_PATH, { recursive: true });
@@ -34,10 +34,9 @@ function checkDatabaseTables() {
 
 checkDatabaseTables();
 
-// Import app AFTER checking database
-console.log('[Startup] Loading app routes...');
-const app = (await import('./app')).default;
-console.log('[Startup] App routes loaded');
+console.log('[Startup] Loading app...');
+import app from './app';
+console.log('[Startup] App loaded');
 
 // Start cleanup scheduler
 startCleanupScheduler();
