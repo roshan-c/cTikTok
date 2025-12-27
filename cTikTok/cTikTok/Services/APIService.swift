@@ -45,13 +45,10 @@ final class APIService: ObservableObject {
             let container = try decoder.singleValueContainer()
             // Try ISO8601 string first
             if let dateString = try? container.decode(String.self) {
-                let formatter = ISO8601DateFormatter()
-                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                if let date = formatter.date(from: dateString) {
+                if let date = DateFormatters.iso8601WithFractional.date(from: dateString) {
                     return date
                 }
-                formatter.formatOptions = [.withInternetDateTime]
-                if let date = formatter.date(from: dateString) {
+                if let date = DateFormatters.iso8601.date(from: dateString) {
                     return date
                 }
             }

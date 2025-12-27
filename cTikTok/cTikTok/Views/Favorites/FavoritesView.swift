@@ -151,6 +151,7 @@ struct FavoritesVideoPlayerView: View {
     @State private var isSpedUp = false
     @State private var timeObserver: Any?
     @State private var observerPlayer: AVPlayer?
+    @State private var loopObserver: NSObjectProtocol?  // Track loop notification observer
     
     var body: some View {
         GeometryReader { geometry in
@@ -397,7 +398,13 @@ struct FavoritesVideoPlayerView: View {
     }
     
     private func setupLooping(for player: AVPlayer) {
-        NotificationCenter.default.addObserver(
+        // Remove existing observer if any
+        if let observer = loopObserver {
+            NotificationCenter.default.removeObserver(observer)
+            loopObserver = nil
+        }
+        
+        loopObserver = NotificationCenter.default.addObserver(
             forName: .AVPlayerItemDidPlayToEndTime,
             object: player.currentItem,
             queue: .main
@@ -408,8 +415,14 @@ struct FavoritesVideoPlayerView: View {
     }
     
     private func cleanupPlayer() {
+        // Remove time observer from the correct player instance
         if let observer = timeObserver, let oldPlayer = observerPlayer {
             oldPlayer.removeTimeObserver(observer)
+        }
+        // Remove loop observer
+        if let observer = loopObserver {
+            NotificationCenter.default.removeObserver(observer)
+            loopObserver = nil
         }
         player?.pause()
         timeObserver = nil
@@ -480,9 +493,7 @@ struct FavoritesVideoPlayerView: View {
             let scheduledDeletionAt = await viewModel.unfavorite(video)
             
             if let deletionDate = scheduledDeletionAt {
-                let formatter = RelativeDateTimeFormatter()
-                formatter.unitsStyle = .full
-                let timeString = formatter.localizedString(for: deletionDate, relativeTo: Date())
+                let timeString = DateFormatters.relative.localizedString(for: deletionDate, relativeTo: Date())
                 viewModel.showToast("Video will be deleted \(timeString)")
             }
         }
@@ -723,18 +734,8 @@ struct FavoritesSlideshowPlayerView: View {
         isLoading = true
         
         let urls = video.absoluteImageURLs
-        var images: [UIImage] = []
-        
-        for url in urls {
-            do {
-                let (data, _) = try await URLSession.shared.data(from: url)
-                if let image = UIImage(data: data) {
-                    images.append(image)
-                }
-            } catch {
-                print("Failed to load image: \(error)")
-            }
-        }
+        // Use ImageCache for parallel downloading with caching
+        let images = await ImageCache.shared.loadImages(from: urls)
         
         await MainActor.run {
             loadedImages = images
@@ -751,11 +752,17 @@ struct FavoritesSlideshowPlayerView: View {
         
         Task {
             do {
-                let (data, _) = try await URLSession.shared.data(from: audioURL)
+                // Try to get cached audio first, otherwise download and cache
+                let localURL: URL
+                if let cachedURL = await VideoCache.shared.getCachedAudioURL(for: video.id) {
+                    localURL = cachedURL
+                } else {
+                    localURL = try await VideoCache.shared.cacheAudio(from: audioURL, videoId: video.id)
+                }
                 
                 await MainActor.run {
                     do {
-                        audioPlayer = try AVAudioPlayer(data: data)
+                        audioPlayer = try AVAudioPlayer(contentsOf: localURL)
                         audioPlayer?.numberOfLoops = -1
                         audioPlayer?.play()
                     } catch {
@@ -763,7 +770,7 @@ struct FavoritesSlideshowPlayerView: View {
                     }
                 }
             } catch {
-                print("Failed to download audio: \(error)")
+                print("Failed to load audio: \(error)")
             }
         }
     }
@@ -807,9 +814,7 @@ struct FavoritesSlideshowPlayerView: View {
             let scheduledDeletionAt = await viewModel.unfavorite(video)
             
             if let deletionDate = scheduledDeletionAt {
-                let formatter = RelativeDateTimeFormatter()
-                formatter.unitsStyle = .full
-                let timeString = formatter.localizedString(for: deletionDate, relativeTo: Date())
+                let timeString = DateFormatters.relative.localizedString(for: deletionDate, relativeTo: Date())
                 viewModel.showToast("Video will be deleted \(timeString)")
             }
         }

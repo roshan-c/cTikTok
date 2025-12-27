@@ -1,16 +1,27 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { createReadStream, existsSync } from 'fs';
-import { stat } from 'fs/promises';
+import { createReadStream } from 'fs';
+import { stat, access, unlink, rm } from 'fs/promises';
+import { dirname } from 'path';
 import { db } from '../db';
 import { videos, users, friendships, favorites } from '../db/schema';
-import { eq, desc, gt, and, inArray, lt } from 'drizzle-orm';
+import { eq, desc, gt, and, inArray, sql } from 'drizzle-orm';
 import { generateId, generateVideoId } from '../utils/id';
 import { authMiddleware } from '../middleware/auth';
 import { config } from '../utils/config';
 import { downloadTikTokVideo, isValidTikTokUrl, cleanupTempFile } from '../services/tiktok';
 import { transcodeVideo } from '../services/transcoder';
 import { processSlideshow, getSlideshowSize } from '../services/slideshow';
+
+// Helper function to check if file exists (async)
+async function fileExists(path: string): Promise<boolean> {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 const videosRoute = new Hono();
 
@@ -35,7 +46,7 @@ videosRoute.get('/:id/stream', async (c) => {
     return c.json({ error: 'Video not found or not ready' }, 404);
   }
 
-  if (!existsSync(video.filePath)) {
+  if (!await fileExists(video.filePath)) {
     return c.json({ error: 'Video file not found' }, 404);
   }
 
@@ -83,7 +94,7 @@ videosRoute.get('/:id/thumbnail', async (c) => {
     where: eq(videos.id, videoId),
   });
 
-  if (!video || !video.thumbnailPath || !existsSync(video.thumbnailPath)) {
+  if (!video || !video.thumbnailPath || !await fileExists(video.thumbnailPath)) {
     return c.json({ error: 'Thumbnail not found' }, 404);
   }
 
@@ -124,7 +135,7 @@ videosRoute.get('/:id/image/:index', async (c) => {
 
   const imagePath = imagePaths[index];
   
-  if (!existsSync(imagePath)) {
+  if (!await fileExists(imagePath)) {
     return c.json({ error: 'Image file not found' }, 404);
   }
 
@@ -151,7 +162,7 @@ videosRoute.get('/:id/audio', async (c) => {
     return c.json({ error: 'Slideshow not found or not ready' }, 404);
   }
 
-  if (!video.audioPath || !existsSync(video.audioPath)) {
+  if (!video.audioPath || !await fileExists(video.audioPath)) {
     return c.json({ error: 'Audio not found' }, 404);
   }
 
@@ -472,8 +483,9 @@ videosRoute.get('/check', async (c) => {
   
   const allowedSenderIds = [user.userId, ...friendIds];
 
-  const newVideos = await db
-    .select({ id: videos.id })
+  // Use COUNT for efficiency instead of fetching all IDs
+  const countResult = await db
+    .select({ count: sql<number>`COUNT(*)` })
     .from(videos)
     .where(and(
       eq(videos.status, 'ready'),
@@ -481,9 +493,11 @@ videosRoute.get('/check', async (c) => {
       inArray(videos.senderId, allowedSenderIds)
     ));
 
+  const count = countResult[0]?.count ?? 0;
+
   return c.json({
-    count: newVideos.length,
-    hasNew: newVideos.length > 0,
+    count,
+    hasNew: count > 0,
   });
 });
 
@@ -564,22 +578,38 @@ videosRoute.get('/favorites', async (c) => {
 videosRoute.get('/:id', async (c) => {
   const videoId = c.req.param('id');
 
-  const video = await db.query.videos.findFirst({
-    where: eq(videos.id, videoId),
-  });
+  // Use JOIN to fetch video and sender in a single query
+  const result = await db
+    .select({
+      id: videos.id,
+      senderId: videos.senderId,
+      senderUsername: users.username,
+      mediaType: videos.mediaType,
+      status: videos.status,
+      images: videos.images,
+      durationSeconds: videos.durationSeconds,
+      fileSizeBytes: videos.fileSizeBytes,
+      tiktokAuthor: videos.tiktokAuthor,
+      tiktokDescription: videos.tiktokDescription,
+      message: videos.message,
+      createdAt: videos.createdAt,
+      expiresAt: videos.expiresAt,
+    })
+    .from(videos)
+    .leftJoin(users, eq(videos.senderId, users.id))
+    .where(eq(videos.id, videoId))
+    .limit(1);
 
-  if (!video) {
+  if (result.length === 0) {
     return c.json({ error: 'Video not found' }, 404);
   }
 
-  const sender = await db.query.users.findFirst({
-    where: eq(users.id, video.senderId),
-  });
+  const video = result[0];
 
   const base = {
     id: video.id,
     senderId: video.senderId,
-    senderUsername: sender?.username,
+    senderUsername: video.senderUsername,
     mediaType: video.mediaType,
     status: video.status,
     durationSeconds: video.durationSeconds,
@@ -625,9 +655,6 @@ videosRoute.delete('/:id', async (c) => {
     return c.json({ error: 'Not authorized to delete this video' }, 403);
   }
 
-  const { unlink, rm } = await import('fs/promises');
-  const { dirname } = await import('path');
-
   // Delete files based on media type
   if (video.mediaType === 'slideshow') {
     // Delete slideshow directory
@@ -640,10 +667,10 @@ videosRoute.delete('/:id', async (c) => {
     }
   } else {
     // Delete video file
-    if (video.filePath && existsSync(video.filePath)) {
+    if (video.filePath && await fileExists(video.filePath)) {
       await unlink(video.filePath).catch(() => {});
     }
-    if (video.thumbnailPath && existsSync(video.thumbnailPath)) {
+    if (video.thumbnailPath && await fileExists(video.thumbnailPath)) {
       await unlink(video.thumbnailPath).catch(() => {});
     }
   }

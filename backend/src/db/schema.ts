@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
 
 // Users table
 export const users = sqliteTable('users', {
@@ -37,7 +37,12 @@ export const videos = sqliteTable('videos', {
     .notNull()
     .$defaultFn(() => new Date()),
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
-});
+}, (table) => ({
+  senderIdx: index('videos_sender_idx').on(table.senderId),
+  statusIdx: index('videos_status_idx').on(table.status),
+  createdAtIdx: index('videos_created_at_idx').on(table.createdAt),
+  expiresAtIdx: index('videos_expires_at_idx').on(table.expiresAt),
+}));
 
 // Device tokens for future push notifications
 export const deviceTokens = sqliteTable('device_tokens', {
@@ -80,7 +85,9 @@ export const friendRequests = sqliteTable('friend_requests', {
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .$defaultFn(() => new Date()),
-});
+}, (table) => ({
+  toUserStatusIdx: index('friend_requests_to_user_status_idx').on(table.toUserId, table.status),
+}));
 
 // Friendships (bilateral - stored both ways for easy querying)
 export const friendships = sqliteTable('friendships', {
@@ -94,7 +101,10 @@ export const friendships = sqliteTable('friendships', {
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .$defaultFn(() => new Date()),
-});
+}, (table) => ({
+  userIdx: index('friendships_user_idx').on(table.userId),
+  friendIdx: index('friendships_friend_idx').on(table.friendId),
+}));
 
 // Favorites (per-user video favorites)
 export const favorites = sqliteTable('favorites', {
@@ -108,7 +118,10 @@ export const favorites = sqliteTable('favorites', {
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .$defaultFn(() => new Date()),
-});
+}, (table) => ({
+  userIdx: index('favorites_user_idx').on(table.userId),
+  videoIdx: index('favorites_video_idx').on(table.videoId),
+}));
 
 // Type exports
 export type User = typeof users.$inferSelect;

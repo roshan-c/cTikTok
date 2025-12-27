@@ -5,15 +5,19 @@ actor VideoCache {
     static let shared = VideoCache()
     
     private let cacheDirectory: URL
+    private let audioCacheDirectory: URL
     private let maxCacheSize: Int64 = 500 * 1024 * 1024 // 500 MB
     private var cachedVideos: [String: URL] = [:]
+    private var cachedAudio: [String: URL] = [:]
     
     private init() {
         let paths = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
         self.cacheDirectory = paths[0].appendingPathComponent("VideoCache", isDirectory: true)
+        self.audioCacheDirectory = paths[0].appendingPathComponent("AudioCache", isDirectory: true)
         
-        // Create cache directory if needed
+        // Create cache directories if needed
         try? FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: audioCacheDirectory, withIntermediateDirectories: true)
         
         // Load existing cached files
         Task {
@@ -22,18 +26,29 @@ actor VideoCache {
     }
     
     private func loadExistingCache() {
-        guard let files = try? FileManager.default.contentsOfDirectory(at: cacheDirectory, includingPropertiesForKeys: nil) else {
-            return
+        // Load video cache
+        if let files = try? FileManager.default.contentsOfDirectory(at: cacheDirectory, includingPropertiesForKeys: nil) {
+            for file in files where file.pathExtension == "mp4" {
+                let videoId = file.deletingPathExtension().lastPathComponent
+                cachedVideos[videoId] = file
+            }
         }
         
-        for file in files where file.pathExtension == "mp4" {
-            let videoId = file.deletingPathExtension().lastPathComponent
-            cachedVideos[videoId] = file
+        // Load audio cache
+        if let files = try? FileManager.default.contentsOfDirectory(at: audioCacheDirectory, includingPropertiesForKeys: nil) {
+            for file in files where file.pathExtension == "mp3" {
+                let videoId = file.deletingPathExtension().lastPathComponent
+                cachedAudio[videoId] = file
+            }
         }
     }
     
     func getCachedURL(for videoId: String) -> URL? {
         return cachedVideos[videoId]
+    }
+    
+    func getCachedAudioURL(for videoId: String) -> URL? {
+        return cachedAudio[videoId]
     }
     
     func cacheVideo(from remoteURL: URL, videoId: String) async throws -> URL {
@@ -55,6 +70,26 @@ actor VideoCache {
         
         // Clean up old cache if needed
         await cleanupCacheIfNeeded()
+        
+        return localURL
+    }
+    
+    func cacheAudio(from remoteURL: URL, videoId: String) async throws -> URL {
+        // Check if already cached
+        if let cached = cachedAudio[videoId], FileManager.default.fileExists(atPath: cached.path) {
+            return cached
+        }
+        
+        let localURL = audioCacheDirectory.appendingPathComponent("\(videoId).mp3")
+        
+        // Download audio
+        let (tempURL, _) = try await URLSession.shared.download(from: remoteURL)
+        
+        // Move to cache directory
+        try? FileManager.default.removeItem(at: localURL)
+        try FileManager.default.moveItem(at: tempURL, to: localURL)
+        
+        cachedAudio[videoId] = localURL
         
         return localURL
     }
@@ -100,6 +135,10 @@ actor VideoCache {
         try? FileManager.default.removeItem(at: cacheDirectory)
         try? FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
         cachedVideos.removeAll()
+        
+        try? FileManager.default.removeItem(at: audioCacheDirectory)
+        try? FileManager.default.createDirectory(at: audioCacheDirectory, withIntermediateDirectories: true)
+        cachedAudio.removeAll()
     }
 }
 

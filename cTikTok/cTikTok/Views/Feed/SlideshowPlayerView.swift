@@ -233,18 +233,8 @@ struct SlideshowPlayerView: View {
         isLoading = true
         
         let urls = video.absoluteImageURLs
-        var images: [UIImage] = []
-        
-        for url in urls {
-            do {
-                let (data, _) = try await URLSession.shared.data(from: url)
-                if let image = UIImage(data: data) {
-                    images.append(image)
-                }
-            } catch {
-                print("Failed to load image: \(error)")
-            }
-        }
+        // Use ImageCache for parallel downloading with caching
+        let images = await ImageCache.shared.loadImages(from: urls)
         
         await MainActor.run {
             loadedImages = images
@@ -262,11 +252,17 @@ struct SlideshowPlayerView: View {
         
         Task {
             do {
-                let (data, _) = try await URLSession.shared.data(from: audioURL)
+                // Try to get cached audio first, otherwise download and cache
+                let localURL: URL
+                if let cachedURL = await VideoCache.shared.getCachedAudioURL(for: video.id) {
+                    localURL = cachedURL
+                } else {
+                    localURL = try await VideoCache.shared.cacheAudio(from: audioURL, videoId: video.id)
+                }
                 
                 await MainActor.run {
                     do {
-                        audioPlayer = try AVAudioPlayer(data: data)
+                        audioPlayer = try AVAudioPlayer(contentsOf: localURL)
                         audioPlayer?.numberOfLoops = -1 // Loop indefinitely
                         audioPlayer?.play()
                     } catch {
@@ -274,7 +270,7 @@ struct SlideshowPlayerView: View {
                     }
                 }
             } catch {
-                print("Failed to download audio: \(error)")
+                print("Failed to load audio: \(error)")
             }
         }
     }
@@ -321,9 +317,7 @@ struct SlideshowPlayerView: View {
             
             // Show toast if video will be deleted
             if let deletionDate = scheduledDeletionAt {
-                let formatter = RelativeDateTimeFormatter()
-                formatter.unitsStyle = .full
-                let timeString = formatter.localizedString(for: deletionDate, relativeTo: Date())
+                let timeString = DateFormatters.relative.localizedString(for: deletionDate, relativeTo: Date())
                 viewModel.showToast("Video will be deleted \(timeString)")
             }
         }

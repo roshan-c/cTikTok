@@ -1,17 +1,27 @@
 import { Hono } from 'hono';
-import { createReadStream, existsSync, statSync } from 'fs';
-import { readFile } from 'fs/promises';
+import { createReadStream } from 'fs';
+import { readFile, stat, access } from 'fs/promises';
 import { join } from 'path';
 
 const altstoreRoute = new Hono();
 
 const ALTSTORE_PATH = './altstore';
 
+// Helper function to check if file exists (async)
+async function fileExists(path: string): Promise<boolean> {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Serve source.json
 altstoreRoute.get('/source.json', async (c) => {
   const filePath = join(ALTSTORE_PATH, 'source.json');
   
-  if (!existsSync(filePath)) {
+  if (!await fileExists(filePath)) {
     return c.json({ error: 'Source not found' }, 404);
   }
 
@@ -20,8 +30,8 @@ altstoreRoute.get('/source.json', async (c) => {
   
   // Update the size dynamically if IPA exists
   const ipaPath = join(ALTSTORE_PATH, 'cTikTok.ipa');
-  if (existsSync(ipaPath)) {
-    const stats = statSync(ipaPath);
+  if (await fileExists(ipaPath)) {
+    const stats = await stat(ipaPath);
     source.apps[0].size = stats.size;
   }
 
@@ -32,11 +42,11 @@ altstoreRoute.get('/source.json', async (c) => {
 altstoreRoute.get('/cTikTok.ipa', async (c) => {
   const filePath = join(ALTSTORE_PATH, 'cTikTok.ipa');
   
-  if (!existsSync(filePath)) {
+  if (!await fileExists(filePath)) {
     return c.json({ error: 'IPA not found' }, 404);
   }
 
-  const stats = statSync(filePath);
+  const stats = await stat(filePath);
   const stream = createReadStream(filePath);
 
   return new Response(stream as unknown as ReadableStream, {
@@ -53,7 +63,7 @@ altstoreRoute.get('/cTikTok.ipa', async (c) => {
 altstoreRoute.get('/icon.png', async (c) => {
   const filePath = join(ALTSTORE_PATH, 'icon.png');
   
-  if (!existsSync(filePath)) {
+  if (!await fileExists(filePath)) {
     return c.json({ error: 'Icon not found' }, 404);
   }
 

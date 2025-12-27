@@ -36,6 +36,13 @@
       "when": 1766850836361,
       "tag": "0004_open_penance",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1766855516417,
+      "tag": "0005_polite_bruce_banner",
+      "breakpoints": true
     }
   ]
 }

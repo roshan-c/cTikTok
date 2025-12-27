@@ -17,6 +17,7 @@ struct VideoPlayerView: View {
     @State private var isSpedUp = false
     @State private var timeObserver: Any?
     @State private var observerPlayer: AVPlayer?  // Track which player owns the observer
+    @State private var loopObserver: NSObjectProtocol?  // Track loop notification observer
     
     init(video: Video, isActive: Bool, viewModel: VideoFeedViewModel) {
         self.video = video
@@ -293,7 +294,13 @@ struct VideoPlayerView: View {
     }
     
     private func setupLooping(for player: AVPlayer) {
-        NotificationCenter.default.addObserver(
+        // Remove existing observer if any
+        if let observer = loopObserver {
+            NotificationCenter.default.removeObserver(observer)
+            loopObserver = nil
+        }
+        
+        loopObserver = NotificationCenter.default.addObserver(
             forName: .AVPlayerItemDidPlayToEndTime,
             object: player.currentItem,
             queue: .main
@@ -305,9 +312,14 @@ struct VideoPlayerView: View {
     }
     
     private func cleanupPlayer() {
-        // Remove observer from the correct player instance
+        // Remove time observer from the correct player instance
         if let observer = timeObserver, let oldPlayer = observerPlayer {
             oldPlayer.removeTimeObserver(observer)
+        }
+        // Remove loop observer
+        if let observer = loopObserver {
+            NotificationCenter.default.removeObserver(observer)
+            loopObserver = nil
         }
         player?.pause()
         timeObserver = nil
@@ -386,9 +398,7 @@ struct VideoPlayerView: View {
             
             // Show toast if video will be deleted
             if let deletionDate = scheduledDeletionAt {
-                let formatter = RelativeDateTimeFormatter()
-                formatter.unitsStyle = .full
-                let timeString = formatter.localizedString(for: deletionDate, relativeTo: Date())
+                let timeString = DateFormatters.relative.localizedString(for: deletionDate, relativeTo: Date())
                 viewModel.showToast("Video will be deleted \(timeString)")
             }
         }

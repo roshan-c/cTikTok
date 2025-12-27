@@ -20,7 +20,7 @@ const TiktokDL = require('@tobyg74/tiktok-api-dl') as {
 };
 import { spawn } from 'child_process';
 import { existsSync } from 'fs';
-import { unlink, writeFile, mkdir } from 'fs/promises';
+import { unlink, writeFile, mkdir, rm } from 'fs/promises';
 import { join } from 'path';
 import { config } from '../utils/config';
 import { generateVideoId } from '../utils/id';
@@ -247,7 +247,6 @@ export async function cleanupTempFile(filePath: string): Promise<void> {
 // Cleanup slideshow directory
 export async function cleanupSlideshowDir(dirPath: string): Promise<void> {
   try {
-    const { rm } = await import('fs/promises');
     await rm(dirPath, { recursive: true, force: true });
   } catch {
     // Ignore errors

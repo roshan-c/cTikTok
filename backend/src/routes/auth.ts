@@ -3,7 +3,7 @@ import { z } from 'zod';
 import bcrypt from 'bcrypt';
 import { db } from '../db';
 import { users, friendCodes, friendRequests } from '../db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { generateId } from '../utils/id';
 import { generateFriendCode } from '../utils/friendCode';
 import { generateToken, authMiddleware } from '../middleware/auth';
@@ -162,13 +162,16 @@ auth.get('/me', authMiddleware, async (c) => {
   }
 
   try {
-    // Count pending friend requests
-    const pendingRequests = await db
-      .select()
+    // Count pending friend requests using SQL COUNT for efficiency
+    const countResult = await db
+      .select({ count: sql<number>`COUNT(*)` })
       .from(friendRequests)
-      .where(eq(friendRequests.toUserId, userId));
+      .where(and(
+        eq(friendRequests.toUserId, userId),
+        eq(friendRequests.status, 'pending')
+      ));
     
-    pendingRequestCount = pendingRequests.filter(r => r.status === 'pending').length;
+    pendingRequestCount = countResult[0]?.count ?? 0;
   } catch (error) {
     console.error('[Auth/me] Error counting pending requests:', error);
   }
