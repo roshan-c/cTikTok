@@ -26,6 +26,7 @@ services:
     volumes:
       - ./data:/app/data
       - ./videos:/app/videos
+      - ./altstore:/app/altstore
     environment:
       - JWT_SECRET=${JWT_SECRET}
       - PORT=3000

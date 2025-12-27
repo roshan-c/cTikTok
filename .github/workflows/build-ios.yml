@@ -145,16 +145,11 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          # First, upload the IPA and source.json directly to VPS
+          # Upload the IPA and source.json directly to VPS
+          # The altstore folder is mounted as a volume, so no rebuild needed
           scp -i ~/.ssh/deploy_key \
             backend/altstore/cTikTok.ipa \
             backend/altstore/source.json \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:~/ctiktok/backend/altstore/
           
-          # Then rebuild docker (no git pull needed - files are already uploaded)
-          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-            cd ~/ctiktok/backend
-            docker compose down
-            docker compose up -d --build
-            echo "iOS app v${{ steps.version.outputs.version }} deployed!"
-          EOF
+          echo "iOS app v${{ steps.version.outputs.version }} deployed!"
