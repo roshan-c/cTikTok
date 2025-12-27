@@ -1,7 +1,7 @@
 import Foundation
 
 // MARK: - API Configuration
-// cTikTok configuration constants
+// App constants
 enum AppConfig {
     static let apiBaseURL = "https://ctiktok.roshanc.com"
     static let appGroupIdentifier = "group.com.roshanc.ctiktok"
