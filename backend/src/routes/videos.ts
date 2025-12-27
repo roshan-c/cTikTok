@@ -487,6 +487,79 @@ videosRoute.get('/check', async (c) => {
   });
 });
 
+// ============================================
+// FAVORITES ENDPOINTS
+// ============================================
+// NOTE: These must be defined BEFORE /:id routes to avoid "favorites" being treated as an ID
+
+// Get user's favorited videos
+videosRoute.get('/favorites', async (c) => {
+  const user = c.get('user');
+
+  // Get all favorites for this user with video details
+  const userFavorites = await db
+    .select({
+      id: videos.id,
+      senderId: videos.senderId,
+      senderUsername: users.username,
+      mediaType: videos.mediaType,
+      status: videos.status,
+      images: videos.images,
+      durationSeconds: videos.durationSeconds,
+      fileSizeBytes: videos.fileSizeBytes,
+      tiktokAuthor: videos.tiktokAuthor,
+      tiktokDescription: videos.tiktokDescription,
+      message: videos.message,
+      createdAt: videos.createdAt,
+      expiresAt: videos.expiresAt,
+      favoritedAt: favorites.createdAt,
+    })
+    .from(favorites)
+    .innerJoin(videos, eq(favorites.videoId, videos.id))
+    .leftJoin(users, eq(videos.senderId, users.id))
+    .where(and(
+      eq(favorites.userId, user.userId),
+      eq(videos.status, 'ready')
+    ))
+    .orderBy(desc(favorites.createdAt));
+
+  return c.json({
+    videos: userFavorites.map(v => {
+      const base = {
+        id: v.id,
+        senderId: v.senderId,
+        senderUsername: v.senderUsername,
+        mediaType: v.mediaType,
+        status: v.status,
+        durationSeconds: v.durationSeconds,
+        fileSizeBytes: v.fileSizeBytes,
+        tiktokAuthor: v.tiktokAuthor,
+        tiktokDescription: v.tiktokDescription,
+        message: v.message,
+        createdAt: v.createdAt,
+        expiresAt: v.expiresAt,
+        thumbnailUrl: `/api/videos/${v.id}/thumbnail`,
+        isFavorited: true,
+      };
+
+      if (v.mediaType === 'slideshow' && v.images) {
+        const imagePaths: string[] = JSON.parse(v.images);
+        return {
+          ...base,
+          imageCount: imagePaths.length,
+          imageUrls: imagePaths.map((_, i) => `/api/videos/${v.id}/image/${i}`),
+          audioUrl: `/api/videos/${v.id}/audio`,
+        };
+      }
+
+      return {
+        ...base,
+        streamUrl: `/api/videos/${v.id}/stream`,
+      };
+    }),
+  });
+});
+
 // Get single video info
 videosRoute.get('/:id', async (c) => {
   const videoId = c.req.param('id');
@@ -579,78 +652,6 @@ videosRoute.delete('/:id', async (c) => {
   await db.delete(videos).where(eq(videos.id, videoId));
 
   return c.json({ message: 'Video deleted' });
-});
-
-// ============================================
-// FAVORITES ENDPOINTS
-// ============================================
-
-// Get user's favorited videos
-videosRoute.get('/favorites', async (c) => {
-  const user = c.get('user');
-
-  // Get all favorites for this user with video details
-  const userFavorites = await db
-    .select({
-      id: videos.id,
-      senderId: videos.senderId,
-      senderUsername: users.username,
-      mediaType: videos.mediaType,
-      status: videos.status,
-      images: videos.images,
-      durationSeconds: videos.durationSeconds,
-      fileSizeBytes: videos.fileSizeBytes,
-      tiktokAuthor: videos.tiktokAuthor,
-      tiktokDescription: videos.tiktokDescription,
-      message: videos.message,
-      createdAt: videos.createdAt,
-      expiresAt: videos.expiresAt,
-      favoritedAt: favorites.createdAt,
-    })
-    .from(favorites)
-    .innerJoin(videos, eq(favorites.videoId, videos.id))
-    .leftJoin(users, eq(videos.senderId, users.id))
-    .where(and(
-      eq(favorites.userId, user.userId),
-      eq(videos.status, 'ready')
-    ))
-    .orderBy(desc(favorites.createdAt));
-
-  return c.json({
-    videos: userFavorites.map(v => {
-      const base = {
-        id: v.id,
-        senderId: v.senderId,
-        senderUsername: v.senderUsername,
-        mediaType: v.mediaType,
-        status: v.status,
-        durationSeconds: v.durationSeconds,
-        fileSizeBytes: v.fileSizeBytes,
-        tiktokAuthor: v.tiktokAuthor,
-        tiktokDescription: v.tiktokDescription,
-        message: v.message,
-        createdAt: v.createdAt,
-        expiresAt: v.expiresAt,
-        thumbnailUrl: `/api/videos/${v.id}/thumbnail`,
-        isFavorited: true,
-      };
-
-      if (v.mediaType === 'slideshow' && v.images) {
-        const imagePaths: string[] = JSON.parse(v.images);
-        return {
-          ...base,
-          imageCount: imagePaths.length,
-          imageUrls: imagePaths.map((_, i) => `/api/videos/${v.id}/image/${i}`),
-          audioUrl: `/api/videos/${v.id}/audio`,
-        };
-      }
-
-      return {
-        ...base,
-        streamUrl: `/api/videos/${v.id}/stream`,
-      };
-    }),
-  });
 });
 
 // Add video to favorites
