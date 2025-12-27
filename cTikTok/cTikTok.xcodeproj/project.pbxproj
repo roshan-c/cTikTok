@@ -10,6 +10,8 @@
 		012A5EFE2EFF029F00365820 /* SlideshowPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 012A5EFD2EFF029F00365820 /* SlideshowPlayerView.swift */; };
 		333333333333333333333330 /* FavoritesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333333333333333333333331 /* FavoritesViewModel.swift */; };
 		333333333333333333333332 /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333333333333333333333333 /* FavoritesView.swift */; };
+		444444444444444444444440 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444444444444444444444441 /* ImageCache.swift */; };
+		444444444444444444444442 /* DateFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444444444444444444444443 /* DateFormatters.swift */; };
 		22222222222222222222221A /* FriendsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22222222222222222222221B /* FriendsViewModel.swift */; };
 		22222222222222222222221C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22222222222222222222221D /* SettingsView.swift */; };
 		22222222222222222222221E /* MyFriendCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22222222222222222222221F /* MyFriendCodeView.swift */; };
@@ -56,6 +58,8 @@
 		012A5EFD2EFF029F00365820 /* SlideshowPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideshowPlayerView.swift; sourceTree = "<group>"; };
 		333333333333333333333331 /* FavoritesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesViewModel.swift; sourceTree = "<group>"; };
 		333333333333333333333333 /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
+		444444444444444444444441 /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
+		444444444444444444444443 /* DateFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatters.swift; sourceTree = "<group>"; };
 		22222222222222222222221B /* FriendsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsViewModel.swift; sourceTree = "<group>"; };
 		22222222222222222222221D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		22222222222222222222221F /* MyFriendCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyFriendCodeView.swift; sourceTree = "<group>"; };
@@ -189,6 +193,7 @@
 			children = (
 				111111111111111111111127 /* APIService.swift */,
 				111111111111111111111129 /* VideoCache.swift */,
+				444444444444444444444441 /* ImageCache.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -197,6 +202,7 @@
 			isa = PBXGroup;
 			children = (
 				111111111111111111111123 /* KeychainHelper.swift */,
+				444444444444444444444443 /* DateFormatters.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -359,9 +365,11 @@
 				11111111111111111111111C /* ContentView.swift in Sources */,
 				111111111111111111111120 /* Constants.swift in Sources */,
 				111111111111111111111122 /* KeychainHelper.swift in Sources */,
+				444444444444444444444442 /* DateFormatters.swift in Sources */,
 				111111111111111111111124 /* Models.swift in Sources */,
 				111111111111111111111126 /* APIService.swift in Sources */,
 				111111111111111111111128 /* VideoCache.swift in Sources */,
+				444444444444444444444440 /* ImageCache.swift in Sources */,
 				11111111111111111111112A /* AuthViewModel.swift in Sources */,
 				11111111111111111111112C /* VideoFeedViewModel.swift in Sources */,
 				11111111111111111111112E /* SendVideoViewModel.swift in Sources */,
