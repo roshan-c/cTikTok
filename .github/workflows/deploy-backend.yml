@@ -25,7 +25,7 @@ jobs:
             cd backend
             docker compose down
             docker compose up -d --build
-            # Wait for container to be healthy and show startup logs
-            sleep 5
-            docker compose logs ctiktok --tail 50
+            # Wait for container to be healthy and show ALL startup logs
+            sleep 8
+            docker compose logs ctiktok
             echo "Backend deployed successfully!"
