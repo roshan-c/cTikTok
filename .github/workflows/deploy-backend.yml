@@ -24,7 +24,9 @@ jobs:
             git pull origin main
             cd backend
             docker compose down
-            docker compose up -d --build
+            # Force rebuild without cache to ensure new code is deployed
+            docker compose build --no-cache
+            docker compose up -d
             # Wait for container to be healthy and show ALL startup logs
             sleep 8
             docker compose logs ctiktok
