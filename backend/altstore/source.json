@@ -9,14 +9,14 @@
       "bundleIdentifier": "com.roshanc.ctiktok",
       "developerName": "Roshan",
       "subtitle": "Share TikToks without TikTok",
-      "version": "1.6",
+      "version": "1.7",
       "versionDate": "2025-12-27",
-      "versionDescription": "Trigger iOS build with MARKETING_VERSION fix",
+      "versionDescription": "Add friends system with friend codes and privacy",
       "downloadURL": "https://ctiktok.roshanc.com/altstore/cTikTok.ipa",
       "localizedDescription": "A private app for sharing TikTok videos and slideshows. Features a TikTok-style vertical swipe interface, automatic video transcoding, and support for photo slideshows with audio.",
       "iconURL": "https://ctiktok.roshanc.com/altstore/icon.png",
       "tintColor": "E91E63",
-      "size": 319309,
+      "size": 485502,
       "screenshotURLs": []
     }
   ],
