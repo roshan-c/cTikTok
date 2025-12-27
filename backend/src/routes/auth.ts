@@ -52,11 +52,17 @@ auth.post('/register', async (c) => {
 
   // Generate friend code for new user
   const code = generateFriendCode();
-  await db.insert(friendCodes).values({
-    id: generateId(),
-    userId,
-    code,
-  });
+  console.log(`[Auth] Generating friend code ${code} for new user ${userId}`);
+  try {
+    await db.insert(friendCodes).values({
+      id: generateId(),
+      userId,
+      code,
+    });
+    console.log(`[Auth] Friend code saved successfully`);
+  } catch (error) {
+    console.error(`[Auth] Error saving friend code:`, error);
+  }
 
   const token = generateToken({ userId, username: username.toLowerCase() });
 
@@ -95,25 +101,33 @@ auth.post('/login', async (c) => {
   const token = generateToken({ userId: user.id, username: user.username });
 
   // Get friend code
-  let codeRecord = await db.query.friendCodes.findFirst({
-    where: eq(friendCodes.userId, user.id),
-  });
-
-  // Generate if doesn't exist (for existing users before this update)
-  if (!codeRecord) {
-    const newCode = generateFriendCode();
-    await db.insert(friendCodes).values({
-      id: generateId(),
-      userId: user.id,
-      code: newCode,
+  let friendCode: string | null = null;
+  try {
+    let codeRecord = await db.query.friendCodes.findFirst({
+      where: eq(friendCodes.userId, user.id),
     });
-    codeRecord = { id: '', userId: user.id, code: newCode, createdAt: new Date() };
+
+    // Generate if doesn't exist (for existing users before this update)
+    if (!codeRecord) {
+      const newCode = generateFriendCode();
+      console.log(`[Auth/login] Generating friend code ${newCode} for existing user ${user.id}`);
+      await db.insert(friendCodes).values({
+        id: generateId(),
+        userId: user.id,
+        code: newCode,
+      });
+      friendCode = newCode;
+    } else {
+      friendCode = codeRecord.code;
+    }
+  } catch (error) {
+    console.error('[Auth/login] Error with friend code:', error);
   }
 
   return c.json({
     message: 'Login successful',
     token,
-    user: { id: user.id, username: user.username, friendCode: codeRecord.code },
+    user: { id: user.id, username: user.username, friendCode },
   });
 });
 
@@ -122,33 +136,47 @@ auth.get('/me', authMiddleware, async (c) => {
   const { userId, username } = c.get('user');
 
   // Get friend code
-  let codeRecord = await db.query.friendCodes.findFirst({
-    where: eq(friendCodes.userId, userId),
-  });
-
-  // Generate if doesn't exist (for existing users before this update)
-  if (!codeRecord) {
-    const newCode = generateFriendCode();
-    await db.insert(friendCodes).values({
-      id: generateId(),
-      userId,
-      code: newCode,
+  let friendCode: string | null = null;
+  let pendingRequestCount = 0;
+  
+  try {
+    let codeRecord = await db.query.friendCodes.findFirst({
+      where: eq(friendCodes.userId, userId),
     });
-    codeRecord = { id: '', userId, code: newCode, createdAt: new Date() };
+
+    // Generate if doesn't exist (for existing users before this update)
+    if (!codeRecord) {
+      const newCode = generateFriendCode();
+      console.log(`[Auth/me] Generating friend code ${newCode} for user ${userId}`);
+      await db.insert(friendCodes).values({
+        id: generateId(),
+        userId,
+        code: newCode,
+      });
+      friendCode = newCode;
+    } else {
+      friendCode = codeRecord.code;
+    }
+  } catch (error) {
+    console.error('[Auth/me] Error with friend code:', error);
   }
 
-  // Count pending friend requests
-  const pendingRequests = await db
-    .select()
-    .from(friendRequests)
-    .where(eq(friendRequests.toUserId, userId));
-  
-  const pendingRequestCount = pendingRequests.filter(r => r.status === 'pending').length;
+  try {
+    // Count pending friend requests
+    const pendingRequests = await db
+      .select()
+      .from(friendRequests)
+      .where(eq(friendRequests.toUserId, userId));
+    
+    pendingRequestCount = pendingRequests.filter(r => r.status === 'pending').length;
+  } catch (error) {
+    console.error('[Auth/me] Error counting pending requests:', error);
+  }
 
   return c.json({ 
     id: userId, 
     username,
-    friendCode: codeRecord.code,
+    friendCode,
     pendingRequestCount,
   });
 });

@@ -355,12 +355,19 @@ videosRoute.get('/', async (c) => {
   since.setHours(since.getHours() - hours);
 
   // Get list of friend IDs
-  const userFriendships = await db
-    .select({ friendId: friendships.friendId })
-    .from(friendships)
-    .where(eq(friendships.userId, user.userId));
-  
-  const friendIds = userFriendships.map(f => f.friendId);
+  let friendIds: string[] = [];
+  try {
+    const userFriendships = await db
+      .select({ friendId: friendships.friendId })
+      .from(friendships)
+      .where(eq(friendships.userId, user.userId));
+    
+    friendIds = userFriendships.map(f => f.friendId);
+    console.log(`[Videos] User ${user.userId} has ${friendIds.length} friends`);
+  } catch (error) {
+    console.error('[Videos] Error fetching friendships:', error);
+    // If friendships table doesn't exist, only show own videos
+  }
   
   // Include self and friends
   const allowedSenderIds = [user.userId, ...friendIds];
@@ -442,12 +449,18 @@ videosRoute.get('/check', async (c) => {
   }
 
   // Get list of friend IDs
-  const userFriendships = await db
-    .select({ friendId: friendships.friendId })
-    .from(friendships)
-    .where(eq(friendships.userId, user.userId));
+  let friendIds: string[] = [];
+  try {
+    const userFriendships = await db
+      .select({ friendId: friendships.friendId })
+      .from(friendships)
+      .where(eq(friendships.userId, user.userId));
+    
+    friendIds = userFriendships.map(f => f.friendId);
+  } catch (error) {
+    console.error('[Videos/check] Error fetching friendships:', error);
+  }
   
-  const friendIds = userFriendships.map(f => f.friendId);
   const allowedSenderIds = [user.userId, ...friendIds];
 
   const newVideos = await db
