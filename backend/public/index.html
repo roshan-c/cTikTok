@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cTikTok - Installation Guide</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 40px rgba(233, 30, 99, 0.3);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #E91E63, #ff6b9d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tagline {
+      color: #888;
+      font-size: 1.1rem;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .step-number {
+      background: linear-gradient(135deg, #E91E63, #ff6b9d);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    h3 {
+      font-size: 1rem;
+      color: #E91E63;
+      margin: 20px 0 10px 0;
+    }
+
+    ol, ul {
+      margin-left: 20px;
+      margin-bottom: 15px;
+    }
+
+    li {
+      margin-bottom: 10px;
+      color: #ccc;
+    }
+
+    .url-box {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(233, 30, 99, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      font-size: 0.9rem;
+      word-break: break-all;
+      color: #ff6b9d;
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #E91E63;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: background 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: #c2185b;
+    }
+
+    .copy-btn:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    .altstore-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #E91E63, #ff6b9d);
+      color: white;
+      padding: 14px 28px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      margin: 15px 0;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .altstore-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(233, 30, 99, 0.4);
+    }
+
+    .warning {
+      background: rgba(255, 193, 7, 0.1);
+      border: 1px solid rgba(255, 193, 7, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 30px;
+    }
+
+    .warning h3 {
+      color: #ffc107;
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .warning ul {
+      margin-bottom: 0;
+    }
+
+    .requirements {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .requirement {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .requirement-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .requirement-text {
+      color: #ccc;
+      font-size: 0.9rem;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 500px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .url-box {
+        font-size: 0.8rem;
+        padding-right: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="/altstore/icon.png" alt="cTikTok" class="logo">
+      <h1>cTikTok</h1>
+      <p class="tagline">Share TikToks without TikTok</p>
+    </header>
+
+    <div class="card">
+      <h2>What You'll Need</h2>
+      <div class="requirements">
+        <div class="requirement">
+          <div class="requirement-icon">📱</div>
+          <div class="requirement-text">An iPhone</div>
+        </div>
+        <div class="requirement">
+          <div class="requirement-icon">💻</div>
+          <div class="requirement-text">A computer (for initial setup)</div>
+        </div>
+        <div class="requirement">
+          <div class="requirement-icon">📦</div>
+          <div class="requirement-text">AltStore app</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="step-number">1</span> Install AltStore</h2>
+      <p>AltStore lets you install apps outside the App Store. You only need to do this once.</p>
+      
+      <h3>On Mac:</h3>
+      <ol>
+        <li>Download AltServer from <a href="https://altstore.io" target="_blank" style="color: #ff6b9d;">altstore.io</a></li>
+        <li>Open AltServer - it will appear in your menu bar</li>
+        <li>Connect your iPhone to your Mac with a cable</li>
+        <li>Click the AltServer icon → Install AltStore → [Your iPhone]</li>
+        <li>Enter your Apple ID when prompted</li>
+      </ol>
+
+      <h3>On Windows:</h3>
+      <ol>
+        <li>Download AltServer from <a href="https://altstore.io" target="_blank" style="color: #ff6b9d;">altstore.io</a></li>
+        <li>Install iTunes and iCloud from <strong>Apple's website</strong> (not the Microsoft Store)</li>
+        <li>Run AltServer</li>
+        <li>Connect your iPhone with a cable</li>
+        <li>Click the AltServer icon → Install AltStore → [Your iPhone]</li>
+        <li>Enter your Apple ID when prompted</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2><span class="step-number">2</span> Add the cTikTok Source</h2>
+      <ol>
+        <li>Open <strong>AltStore</strong> on your iPhone</li>
+        <li>Go to the <strong>Sources</strong> tab</li>
+        <li>Tap the <strong>+</strong> button</li>
+        <li>Enter this URL:</li>
+      </ol>
+      
+      <div class="url-box">
+        <span id="source-url">https://ctiktok.roshanc.com/altstore/source.json</span>
+        <button class="copy-btn" onclick="copyUrl()">Copy</button>
+      </div>
+
+      <p style="text-align: center; margin-top: 10px; color: #888;">Or tap this button on your iPhone:</p>
+      <p style="text-align: center;">
+        <a href="altstore://source?url=https://ctiktok.roshanc.com/altstore/source.json" class="altstore-link">
+          Add to AltStore
+        </a>
+      </p>
+    </div>
+
+    <div class="card">
+      <h2><span class="step-number">3</span> Install cTikTok</h2>
+      <ol>
+        <li>In AltStore, go to <strong>Browse</strong></li>
+        <li>Find <strong>cTikTok</strong> in the list</li>
+        <li>Tap <strong>GET</strong> to install</li>
+        <li>The app will appear on your home screen!</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2><span class="step-number">4</span> Create Your Account</h2>
+      <ol>
+        <li>Open cTikTok</li>
+        <li>Tap <strong>Register</strong></li>
+        <li>Choose a username and password</li>
+        <li>Start sharing videos!</li>
+      </ol>
+    </div>
+
+    <div class="warning">
+      <h3>⚠️ Important Notes</h3>
+      <ul>
+        <li><strong>Refresh every 7 days:</strong> Apps installed via AltStore expire weekly. Open AltStore and tap "Refresh All" while connected to your computer.</li>
+        <li><strong>Keep AltServer running:</strong> For automatic background refreshes, keep AltServer running on your computer when on the same WiFi.</li>
+        <li><strong>Trust the app:</strong> If prompted, go to Settings → General → VPN & Device Management and trust the developer certificate.</li>
+      </ul>
+    </div>
+
+    <footer>
+      <p>Made with ❤️ for sharing moments together</p>
+    </footer>
+  </div>
+
+  <script>
+    function copyUrl() {
+      const url = document.getElementById('source-url').textContent;
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.textContent = 'Copied!';
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

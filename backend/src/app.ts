@@ -1,6 +1,9 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import { readFile } from 'fs/promises';
+import { existsSync } from 'fs';
+import { join } from 'path';
 import authRoutes from './routes/auth';
 import videosRoutes from './routes/videos';
 import altstoreRoutes from './routes/altstore';
@@ -15,12 +18,21 @@ app.use('*', cors({
   allowHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Health check
-app.get('/', (c) => c.json({ 
-  status: 'ok', 
-  name: 'cTikTok API',
-  version: '1.0.0',
-}));
+// Serve the installation guide homepage
+app.get('/', async (c) => {
+  const htmlPath = join('./public', 'index.html');
+  
+  if (existsSync(htmlPath)) {
+    const html = await readFile(htmlPath, 'utf-8');
+    return c.html(html);
+  }
+  
+  return c.json({ 
+    status: 'ok', 
+    name: 'cTikTok API',
+    version: '1.0.0',
+  });
+});
 
 app.get('/health', (c) => c.json({ status: 'healthy' }));
 
