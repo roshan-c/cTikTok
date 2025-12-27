@@ -96,6 +96,20 @@ export const friendships = sqliteTable('friendships', {
     .$defaultFn(() => new Date()),
 });
 
+// Favorites (per-user video favorites)
+export const favorites = sqliteTable('favorites', {
+  id: text('id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  videoId: text('video_id')
+    .notNull()
+    .references(() => videos.id, { onDelete: 'cascade' }),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -109,3 +123,5 @@ export type FriendRequest = typeof friendRequests.$inferSelect;
 export type NewFriendRequest = typeof friendRequests.$inferInsert;
 export type Friendship = typeof friendships.$inferSelect;
 export type NewFriendship = typeof friendships.$inferInsert;
+export type Favorite = typeof favorites.$inferSelect;
+export type NewFavorite = typeof favorites.$inferInsert;

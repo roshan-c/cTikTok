@@ -25,6 +25,17 @@ struct VideoFeedView: View {
                 topBar
                 Spacer()
             }
+            
+            // Toast overlay
+            if let toast = viewModel.toastMessage {
+                VStack {
+                    Spacer()
+                    ToastView(message: toast)
+                        .padding(.bottom, 100)
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .animation(.easeInOut, value: viewModel.toastMessage)
+            }
         }
         .onAppear {
             viewModel.loadVideos()

@@ -98,6 +98,7 @@ struct Video: Codable, Identifiable {
     let createdAt: Date
     let expiresAt: Date
     let thumbnailUrl: String
+    let isFavorited: Bool?
     
     // Video-specific
     let streamUrl: String?
@@ -109,6 +110,10 @@ struct Video: Codable, Identifiable {
     
     var isSlideshow: Bool {
         mediaType == .slideshow
+    }
+    
+    var isFavoritedValue: Bool {
+        isFavorited ?? false
     }
     
     var absoluteStreamURL: URL? {
@@ -172,5 +177,13 @@ extension Video {
         case createdAt, expiresAt
         case thumbnailUrl, streamUrl
         case imageCount, imageUrls, audioUrl
+        case isFavorited
     }
+}
+
+// MARK: - Favorite Response
+struct FavoriteResponse: Codable {
+    let success: Bool
+    let isFavorited: Bool
+    let scheduledDeletionAt: Date?
 }

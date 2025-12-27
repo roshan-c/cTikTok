@@ -29,6 +29,13 @@
       "when": 1766842902764,
       "tag": "0003_workable_energizer",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1766850836361,
+      "tag": "0004_open_penance",
+      "breakpoints": true
     }
   ]
 }

@@ -3,9 +3,9 @@ import { z } from 'zod';
 import { createReadStream, existsSync } from 'fs';
 import { stat } from 'fs/promises';
 import { db } from '../db';
-import { videos, users, friendships } from '../db/schema';
-import { eq, desc, gt, and, inArray } from 'drizzle-orm';
-import { generateVideoId } from '../utils/id';
+import { videos, users, friendships, favorites } from '../db/schema';
+import { eq, desc, gt, and, inArray, lt } from 'drizzle-orm';
+import { generateId, generateVideoId } from '../utils/id';
 import { authMiddleware } from '../middleware/auth';
 import { config } from '../utils/config';
 import { downloadTikTokVideo, isValidTikTokUrl, cleanupTempFile } from '../services/tiktok';
@@ -372,6 +372,14 @@ videosRoute.get('/', async (c) => {
   // Include self and friends
   const allowedSenderIds = [user.userId, ...friendIds];
 
+  // Get user's favorited video IDs
+  const userFavorites = await db
+    .select({ videoId: favorites.videoId })
+    .from(favorites)
+    .where(eq(favorites.userId, user.userId));
+  
+  const favoritedVideoIds = new Set(userFavorites.map(f => f.videoId));
+
   // If no friends, only show own videos
   const videoList = await db
     .select({
@@ -414,6 +422,7 @@ videosRoute.get('/', async (c) => {
         createdAt: v.createdAt,
         expiresAt: v.expiresAt,
         thumbnailUrl: `/api/videos/${v.id}/thumbnail`,
+        isFavorited: favoritedVideoIds.has(v.id),
       };
 
       if (v.mediaType === 'slideshow' && v.images) {
@@ -570,6 +579,183 @@ videosRoute.delete('/:id', async (c) => {
   await db.delete(videos).where(eq(videos.id, videoId));
 
   return c.json({ message: 'Video deleted' });
+});
+
+// ============================================
+// FAVORITES ENDPOINTS
+// ============================================
+
+// Get user's favorited videos
+videosRoute.get('/favorites', async (c) => {
+  const user = c.get('user');
+
+  // Get all favorites for this user with video details
+  const userFavorites = await db
+    .select({
+      id: videos.id,
+      senderId: videos.senderId,
+      senderUsername: users.username,
+      mediaType: videos.mediaType,
+      status: videos.status,
+      images: videos.images,
+      durationSeconds: videos.durationSeconds,
+      fileSizeBytes: videos.fileSizeBytes,
+      tiktokAuthor: videos.tiktokAuthor,
+      tiktokDescription: videos.tiktokDescription,
+      message: videos.message,
+      createdAt: videos.createdAt,
+      expiresAt: videos.expiresAt,
+      favoritedAt: favorites.createdAt,
+    })
+    .from(favorites)
+    .innerJoin(videos, eq(favorites.videoId, videos.id))
+    .leftJoin(users, eq(videos.senderId, users.id))
+    .where(and(
+      eq(favorites.userId, user.userId),
+      eq(videos.status, 'ready')
+    ))
+    .orderBy(desc(favorites.createdAt));
+
+  return c.json({
+    videos: userFavorites.map(v => {
+      const base = {
+        id: v.id,
+        senderId: v.senderId,
+        senderUsername: v.senderUsername,
+        mediaType: v.mediaType,
+        status: v.status,
+        durationSeconds: v.durationSeconds,
+        fileSizeBytes: v.fileSizeBytes,
+        tiktokAuthor: v.tiktokAuthor,
+        tiktokDescription: v.tiktokDescription,
+        message: v.message,
+        createdAt: v.createdAt,
+        expiresAt: v.expiresAt,
+        thumbnailUrl: `/api/videos/${v.id}/thumbnail`,
+        isFavorited: true,
+      };
+
+      if (v.mediaType === 'slideshow' && v.images) {
+        const imagePaths: string[] = JSON.parse(v.images);
+        return {
+          ...base,
+          imageCount: imagePaths.length,
+          imageUrls: imagePaths.map((_, i) => `/api/videos/${v.id}/image/${i}`),
+          audioUrl: `/api/videos/${v.id}/audio`,
+        };
+      }
+
+      return {
+        ...base,
+        streamUrl: `/api/videos/${v.id}/stream`,
+      };
+    }),
+  });
+});
+
+// Add video to favorites
+videosRoute.post('/:id/favorite', async (c) => {
+  const user = c.get('user');
+  const videoId = c.req.param('id');
+
+  // Check if video exists and is ready
+  const video = await db.query.videos.findFirst({
+    where: eq(videos.id, videoId),
+  });
+
+  if (!video || video.status !== 'ready') {
+    return c.json({ error: 'Video not found or not ready' }, 404);
+  }
+
+  // Check if user can access this video (is sender or friend of sender)
+  if (video.senderId !== user.userId) {
+    const friendship = await db.query.friendships.findFirst({
+      where: and(
+        eq(friendships.userId, user.userId),
+        eq(friendships.friendId, video.senderId)
+      ),
+    });
+
+    if (!friendship) {
+      return c.json({ error: 'Not authorized to favorite this video' }, 403);
+    }
+  }
+
+  // Check if already favorited
+  const existingFavorite = await db.query.favorites.findFirst({
+    where: and(
+      eq(favorites.userId, user.userId),
+      eq(favorites.videoId, videoId)
+    ),
+  });
+
+  if (existingFavorite) {
+    return c.json({ success: true, isFavorited: true });
+  }
+
+  // Create favorite
+  await db.insert(favorites).values({
+    id: generateId(),
+    userId: user.userId,
+    videoId: videoId,
+  });
+
+  console.log(`[Favorites] User ${user.userId} favorited video ${videoId}`);
+
+  return c.json({ success: true, isFavorited: true });
+});
+
+// Remove video from favorites
+videosRoute.delete('/:id/favorite', async (c) => {
+  const user = c.get('user');
+  const videoId = c.req.param('id');
+
+  // Check if video exists
+  const video = await db.query.videos.findFirst({
+    where: eq(videos.id, videoId),
+  });
+
+  if (!video) {
+    return c.json({ error: 'Video not found' }, 404);
+  }
+
+  // Delete favorite
+  await db.delete(favorites).where(
+    and(
+      eq(favorites.userId, user.userId),
+      eq(favorites.videoId, videoId)
+    )
+  );
+
+  console.log(`[Favorites] User ${user.userId} unfavorited video ${videoId}`);
+
+  // Check if video is expired
+  const now = new Date();
+  let scheduledDeletionAt: Date | null = null;
+
+  if (video.expiresAt < now) {
+    // Video is already expired - check if anyone else has it favorited
+    const otherFavorites = await db.query.favorites.findFirst({
+      where: eq(favorites.videoId, videoId),
+    });
+
+    if (!otherFavorites) {
+      // No one else has it favorited - set grace period of 2 minutes
+      scheduledDeletionAt = new Date(now.getTime() + 2 * 60 * 1000);
+      
+      await db.update(videos)
+        .set({ expiresAt: scheduledDeletionAt })
+        .where(eq(videos.id, videoId));
+
+      console.log(`[Favorites] Video ${videoId} scheduled for deletion at ${scheduledDeletionAt.toISOString()}`);
+    }
+  }
+
+  return c.json({ 
+    success: true, 
+    isFavorited: false,
+    ...(scheduledDeletionAt && { scheduledDeletionAt: scheduledDeletionAt.toISOString() })
+  });
 });
 
 export default videosRoute;

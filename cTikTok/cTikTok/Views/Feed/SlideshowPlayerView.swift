@@ -11,8 +11,16 @@ struct SlideshowPlayerView: View {
     @State private var isLoading = true
     @State private var loadedImages: [UIImage] = []
     @State private var isLiked = false
+    @State private var isFavorited = false
     @State private var showHeartAnimation = false
     @State private var heartAnimationPosition: CGPoint = .zero
+    
+    init(video: Video, isActive: Bool, viewModel: VideoFeedViewModel) {
+        self.video = video
+        self.isActive = isActive
+        self.viewModel = viewModel
+        self._isFavorited = State(initialValue: video.isFavoritedValue)
+    }
     
     var body: some View {
         GeometryReader { geometry in
@@ -189,14 +197,30 @@ struct SlideshowPlayerView: View {
                 .foregroundStyle(.white)
             }
             
-            // Save button
+            // Favorite/Bookmark button
+            Button {
+                toggleFavorite()
+            } label: {
+                VStack(spacing: 4) {
+                    Image(systemName: isFavorited ? "bookmark.fill" : "bookmark")
+                        .font(.title)
+                        .foregroundStyle(isFavorited ? .yellow : .white)
+                        .scaleEffect(isFavorited ? 1.1 : 1.0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isFavorited)
+                    Text(isFavorited ? "Saved" : "Save")
+                        .font(.caption2)
+                }
+                .foregroundStyle(.white)
+            }
+            
+            // Download button
             Button {
                 saveSlideshow()
             } label: {
                 VStack(spacing: 4) {
                     Image(systemName: "square.and.arrow.down")
                         .font(.title)
-                    Text("Save")
+                    Text("Download")
                         .font(.caption2)
                 }
                 .foregroundStyle(.white)
@@ -285,6 +309,24 @@ struct SlideshowPlayerView: View {
         isLiked.toggle()
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
         impactFeedback.impactOccurred()
+    }
+    
+    private func toggleFavorite() {
+        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+        impactFeedback.impactOccurred()
+        
+        Task {
+            let scheduledDeletionAt = await viewModel.toggleFavorite(for: video)
+            isFavorited.toggle()
+            
+            // Show toast if video will be deleted
+            if let deletionDate = scheduledDeletionAt {
+                let formatter = RelativeDateTimeFormatter()
+                formatter.unitsStyle = .full
+                let timeString = formatter.localizedString(for: deletionDate, relativeTo: Date())
+                viewModel.showToast("Video will be deleted \(timeString)")
+            }
+        }
     }
     
     private func saveSlideshow() {

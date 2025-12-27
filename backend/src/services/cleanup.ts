@@ -1,22 +1,34 @@
-import { lt } from 'drizzle-orm';
+import { lt, notInArray, and } from 'drizzle-orm';
 import { unlink } from 'fs/promises';
 import { db } from '../db';
-import { videos } from '../db/schema';
+import { videos, favorites } from '../db/schema';
 
 export async function cleanupExpiredVideos(): Promise<number> {
   console.log('[Cleanup] Checking for expired videos...');
   
+  // Get all video IDs that have at least one favorite (these should be kept)
+  const favoritedVideoIds = await db
+    .selectDistinct({ videoId: favorites.videoId })
+    .from(favorites);
+  
+  const favoritedIds = favoritedVideoIds.map(f => f.videoId);
+  
+  // Find expired videos that are NOT favorited by anyone
+  const expiredCondition = favoritedIds.length > 0
+    ? and(lt(videos.expiresAt, new Date()), notInArray(videos.id, favoritedIds))
+    : lt(videos.expiresAt, new Date());
+  
   const expired = await db
     .select()
     .from(videos)
-    .where(lt(videos.expiresAt, new Date()));
+    .where(expiredCondition);
 
   if (expired.length === 0) {
     console.log('[Cleanup] No expired videos found');
     return 0;
   }
 
-  console.log(`[Cleanup] Found ${expired.length} expired videos`);
+  console.log(`[Cleanup] Found ${expired.length} expired videos (excluding favorited)`);
 
   for (const video of expired) {
     // Delete video file
@@ -39,10 +51,10 @@ export async function cleanupExpiredVideos(): Promise<number> {
     }
   }
 
-  // Delete from database
-  const result = await db
+  // Delete from database (same condition as above)
+  await db
     .delete(videos)
-    .where(lt(videos.expiresAt, new Date()));
+    .where(expiredCondition);
 
   console.log(`[Cleanup] Removed ${expired.length} expired videos from database`);
   return expired.length;

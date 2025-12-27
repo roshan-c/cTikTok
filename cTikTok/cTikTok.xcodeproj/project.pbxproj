@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		012A5EFE2EFF029F00365820 /* SlideshowPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 012A5EFD2EFF029F00365820 /* SlideshowPlayerView.swift */; };
+		333333333333333333333330 /* FavoritesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333333333333333333333331 /* FavoritesViewModel.swift */; };
+		333333333333333333333332 /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333333333333333333333333 /* FavoritesView.swift */; };
 		22222222222222222222221A /* FriendsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22222222222222222222221B /* FriendsViewModel.swift */; };
 		22222222222222222222221C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22222222222222222222221D /* SettingsView.swift */; };
 		22222222222222222222221E /* MyFriendCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22222222222222222222221F /* MyFriendCodeView.swift */; };
@@ -52,6 +54,8 @@
 
 /* Begin PBXFileReference section */
 		012A5EFD2EFF029F00365820 /* SlideshowPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideshowPlayerView.swift; sourceTree = "<group>"; };
+		333333333333333333333331 /* FavoritesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesViewModel.swift; sourceTree = "<group>"; };
+		333333333333333333333333 /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
 		22222222222222222222221B /* FriendsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsViewModel.swift; sourceTree = "<group>"; };
 		22222222222222222222221D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		22222222222222222222221F /* MyFriendCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyFriendCodeView.swift; sourceTree = "<group>"; };
@@ -155,6 +159,7 @@
 				111111111111111111111158 /* Feed */,
 				111111111111111111111159 /* Send */,
 				222222222222222222222226 /* Settings */,
+				333333333333333333333334 /* Favorites */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -166,6 +171,7 @@
 				11111111111111111111112D /* VideoFeedViewModel.swift */,
 				11111111111111111111112F /* SendVideoViewModel.swift */,
 				22222222222222222222221B /* FriendsViewModel.swift */,
+				333333333333333333333331 /* FavoritesViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -241,6 +247,14 @@
 				222222222222222222222225 /* FriendsListView.swift */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		333333333333333333333334 /* Favorites */ = {
+			isa = PBXGroup;
+			children = (
+				333333333333333333333333 /* FavoritesView.swift */,
+			);
+			path = Favorites;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -352,6 +366,7 @@
 				11111111111111111111112C /* VideoFeedViewModel.swift in Sources */,
 				11111111111111111111112E /* SendVideoViewModel.swift in Sources */,
 				22222222222222222222221A /* FriendsViewModel.swift in Sources */,
+				333333333333333333333330 /* FavoritesViewModel.swift in Sources */,
 				111111111111111111111130 /* LoginView.swift in Sources */,
 				111111111111111111111132 /* RegisterView.swift in Sources */,
 				111111111111111111111134 /* VideoFeedView.swift in Sources */,
@@ -364,6 +379,7 @@
 				222222222222222222222220 /* AddFriendView.swift in Sources */,
 				222222222222222222222222 /* FriendRequestsView.swift in Sources */,
 				222222222222222222222224 /* FriendsListView.swift in Sources */,
+				333333333333333333333332 /* FavoritesView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

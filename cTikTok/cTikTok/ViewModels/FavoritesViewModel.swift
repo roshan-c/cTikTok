@@ -3,23 +3,25 @@ import SwiftUI
 import AVFoundation
 
 @MainActor
-final class VideoFeedViewModel: ObservableObject {
+final class FavoritesViewModel: ObservableObject {
     @Published var videos: [Video] = []
     @Published var currentVideoId: String?
     @Published var isLoading = false
     @Published var errorMessage: String?
-    @Published var showingSendSheet = false
     @Published var toastMessage: String?
     
     private let preloader = VideoPreloader()
-    private var lastFetchTime: Date?
     
     var currentIndex: Int {
         guard let currentId = currentVideoId else { return 0 }
         return videos.firstIndex(where: { $0.id == currentId }) ?? 0
     }
     
-    func loadVideos() {
+    var isEmpty: Bool {
+        !isLoading && videos.isEmpty
+    }
+    
+    func loadFavorites() {
         guard !isLoading else { return }
         
         Task {
@@ -27,9 +29,8 @@ final class VideoFeedViewModel: ObservableObject {
             errorMessage = nil
             
             do {
-                let fetchedVideos = try await APIService.shared.getVideos(hours: 168) // Last 7 days
+                let fetchedVideos = try await APIService.shared.getFavorites()
                 videos = fetchedVideos
-                lastFetchTime = Date()
                 
                 if currentVideoId == nil, let firstVideo = videos.first {
                     currentVideoId = firstVideo.id
@@ -49,9 +50,8 @@ final class VideoFeedViewModel: ObservableObject {
     
     func refresh() async {
         do {
-            let fetchedVideos = try await APIService.shared.getVideos(hours: 168)
+            let fetchedVideos = try await APIService.shared.getFavorites()
             videos = fetchedVideos
-            lastFetchTime = Date()
             
             // Reset to first video if current is gone
             if let currentId = currentVideoId, !videos.contains(where: { $0.id == currentId }) {
@@ -84,43 +84,18 @@ final class VideoFeedViewModel: ObservableObject {
     
     // MARK: - Favorites
     
-    func toggleFavorite(for video: Video) async -> Date? {
+    func unfavorite(_ video: Video) async -> Date? {
         let videoId = video.id
-        let isCurrentlyFavorited = video.isFavoritedValue
         
         do {
-            let response: FavoriteResponse
-            if isCurrentlyFavorited {
-                response = try await APIService.shared.unfavoriteVideo(id: videoId)
-            } else {
-                response = try await APIService.shared.favoriteVideo(id: videoId)
-            }
+            let response = try await APIService.shared.unfavoriteVideo(id: videoId)
             
-            // Update local state
-            if let index = videos.firstIndex(where: { $0.id == videoId }) {
-                // Create updated video with new favorite status
-                let oldVideo = videos[index]
-                let updatedVideo = Video(
-                    id: oldVideo.id,
-                    senderId: oldVideo.senderId,
-                    senderUsername: oldVideo.senderUsername,
-                    mediaType: oldVideo.mediaType,
-                    status: oldVideo.status,
-                    durationSeconds: oldVideo.durationSeconds,
-                    fileSizeBytes: oldVideo.fileSizeBytes,
-                    tiktokAuthor: oldVideo.tiktokAuthor,
-                    tiktokDescription: oldVideo.tiktokDescription,
-                    message: oldVideo.message,
-                    createdAt: oldVideo.createdAt,
-                    expiresAt: oldVideo.expiresAt,
-                    thumbnailUrl: oldVideo.thumbnailUrl,
-                    isFavorited: response.isFavorited,
-                    streamUrl: oldVideo.streamUrl,
-                    imageCount: oldVideo.imageCount,
-                    imageUrls: oldVideo.imageUrls,
-                    audioUrl: oldVideo.audioUrl
-                )
-                videos[index] = updatedVideo
+            // Remove from local list
+            videos.removeAll { $0.id == videoId }
+            
+            // Reset current video if needed
+            if currentVideoId == videoId {
+                currentVideoId = videos.first?.id
             }
             
             return response.scheduledDeletionAt

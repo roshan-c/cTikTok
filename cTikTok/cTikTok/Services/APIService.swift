@@ -175,6 +175,28 @@ final class APIService: ObservableObject {
         )
     }
     
+    // MARK: - Favorites
+    func getFavorites() async throws -> [Video] {
+        let response: VideoListResponse = try await request(
+            endpoint: "/api/videos/favorites"
+        )
+        return response.videos
+    }
+    
+    func favoriteVideo(id: String) async throws -> FavoriteResponse {
+        try await request(
+            endpoint: "/api/videos/\(id)/favorite",
+            method: "POST"
+        )
+    }
+    
+    func unfavoriteVideo(id: String) async throws -> FavoriteResponse {
+        try await request(
+            endpoint: "/api/videos/\(id)/favorite",
+            method: "DELETE"
+        )
+    }
+    
     // MARK: - Friends
     func getFriends() async throws -> [Friend] {
         let response: FriendsListResponse = try await request(

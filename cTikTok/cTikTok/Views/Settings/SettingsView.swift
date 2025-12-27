@@ -9,6 +9,7 @@ struct SettingsView: View {
     @State private var showingFriendRequests = false
     @State private var showingFriendsList = false
     @State private var showingMyCode = false
+    @State private var showingSavedVideos = false
     
     var body: some View {
         NavigationStack {
@@ -33,6 +34,26 @@ struct SettingsView: View {
                     Text("Share Your Code")
                 } footer: {
                     Text("Share this code with friends so they can add you")
+                }
+                .listRowBackground(Color(.systemGray6).opacity(0.1))
+                
+                // Saved Videos Section
+                Section {
+                    Button {
+                        showingSavedVideos = true
+                    } label: {
+                        HStack {
+                            Label("Saved Videos", systemImage: "bookmark.fill")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.gray)
+                        }
+                    }
+                } header: {
+                    Text("Library")
+                } footer: {
+                    Text("Videos you've saved will stay here forever")
                 }
                 .listRowBackground(Color(.systemGray6).opacity(0.1))
                 
@@ -129,6 +150,9 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showingFriendsList) {
                 FriendsListView(viewModel: friendsViewModel)
+            }
+            .fullScreenCover(isPresented: $showingSavedVideos) {
+                FavoritesView()
             }
         }
         .preferredColorScheme(.dark)
