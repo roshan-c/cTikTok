@@ -6,8 +6,17 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import authRoutes from './routes/auth';
 import videosRoutes from './routes/videos';
-import friendsRoutes from './routes/friends';
 import altstoreRoutes from './routes/altstore';
+
+// Import friends routes with error handling
+let friendsRoutes: Hono | null = null;
+try {
+  const friendsModule = await import('./routes/friends');
+  friendsRoutes = friendsModule.default;
+  console.log('[App] Friends routes loaded successfully');
+} catch (error) {
+  console.error('[App] Failed to load friends routes:', error);
+}
 
 const app = new Hono();
 
@@ -40,7 +49,12 @@ app.get('/health', (c) => c.json({ status: 'healthy' }));
 // Routes
 app.route('/api/auth', authRoutes);
 app.route('/api/videos', videosRoutes);
-app.route('/api/friends', friendsRoutes);
+if (friendsRoutes) {
+  app.route('/api/friends', friendsRoutes);
+  console.log('[App] Friends routes registered at /api/friends');
+} else {
+  console.error('[App] Friends routes NOT registered - routes failed to load');
+}
 app.route('/altstore', altstoreRoutes);
 
 // 404 handler

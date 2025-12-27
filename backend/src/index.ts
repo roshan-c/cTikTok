@@ -1,4 +1,5 @@
 import { mkdirSync } from 'fs';
+import { Database } from 'bun:sqlite';
 import app from './app';
 import { config } from './utils/config';
 import { startCleanupScheduler } from './services/cleanup';
@@ -6,6 +7,31 @@ import { startCleanupScheduler } from './services/cleanup';
 // Ensure directories exist
 mkdirSync(config.VIDEOS_PATH, { recursive: true });
 mkdirSync('./data', { recursive: true });
+
+// Verify database tables exist
+function checkDatabaseTables() {
+  try {
+    const sqlite = new Database(config.DATABASE_PATH, { readonly: true });
+    const tables = sqlite.query("SELECT name FROM sqlite_master WHERE type='table'").all() as { name: string }[];
+    const tableNames = tables.map((t) => t.name);
+    console.log('[DB] Tables found:', tableNames.join(', '));
+    
+    const requiredTables = ['users', 'videos', 'friend_codes', 'friend_requests', 'friendships'];
+    const missingTables = requiredTables.filter(t => !tableNames.includes(t));
+    
+    if (missingTables.length > 0) {
+      console.error('[DB] WARNING: Missing tables:', missingTables.join(', '));
+      console.error('[DB] Please run migrations: bun run db:migrate');
+    } else {
+      console.log('[DB] All required tables present');
+    }
+    sqlite.close();
+  } catch (error) {
+    console.error('[DB] Error checking tables:', error);
+  }
+}
+
+checkDatabaseTables();
 
 // Start cleanup scheduler
 startCleanupScheduler();
