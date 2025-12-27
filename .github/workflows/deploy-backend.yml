@@ -21,15 +21,14 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd ~/ctiktok
-            echo "=== Git status before pull ==="
-            git status
-            echo "=== Pulling from origin ==="
-            git pull origin main
+            echo "=== Resetting local changes ==="
+            git fetch origin
+            git reset --hard origin/main
             echo "=== Git log (last 3 commits) ==="
             git log --oneline -3
             cd backend
             echo "=== Checking index.ts content ==="
-            head -10 src/index.ts
+            head -15 src/index.ts
             echo "=== Building Docker image ==="
             docker compose down
             # Force rebuild without cache to ensure new code is deployed
