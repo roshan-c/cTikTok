@@ -22,6 +22,13 @@
       "when": 1766771027410,
       "tag": "0002_large_jean_grey",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1766842902764,
+      "tag": "0003_workable_energizer",
+      "breakpoints": true
     }
   ]
 }

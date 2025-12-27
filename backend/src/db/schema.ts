@@ -52,6 +52,50 @@ export const deviceTokens = sqliteTable('device_tokens', {
     .$defaultFn(() => new Date()),
 });
 
+// Friend codes for adding friends
+export const friendCodes = sqliteTable('friend_codes', {
+  id: text('id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .unique()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  code: text('code').notNull().unique(),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+// Friend requests (pending, accepted, rejected)
+export const friendRequests = sqliteTable('friend_requests', {
+  id: text('id').primaryKey(),
+  fromUserId: text('from_user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  toUserId: text('to_user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  status: text('status', { enum: ['pending', 'accepted', 'rejected'] })
+    .notNull()
+    .default('pending'),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+// Friendships (bilateral - stored both ways for easy querying)
+export const friendships = sqliteTable('friendships', {
+  id: text('id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  friendId: text('friend_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -59,3 +103,9 @@ export type Video = typeof videos.$inferSelect;
 export type NewVideo = typeof videos.$inferInsert;
 export type DeviceToken = typeof deviceTokens.$inferSelect;
 export type NewDeviceToken = typeof deviceTokens.$inferInsert;
+export type FriendCode = typeof friendCodes.$inferSelect;
+export type NewFriendCode = typeof friendCodes.$inferInsert;
+export type FriendRequest = typeof friendRequests.$inferSelect;
+export type NewFriendRequest = typeof friendRequests.$inferInsert;
+export type Friendship = typeof friendships.$inferSelect;
+export type NewFriendship = typeof friendships.$inferInsert;

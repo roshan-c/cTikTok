@@ -7,20 +7,36 @@ final class AuthViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var currentUser: User?
+    @Published var pendingRequestCount: Int = 0
     
     init() {
         checkAuthentication()
     }
     
     func checkAuthentication() {
-        if let token = KeychainHelper.shared.loadString(forKey: KeychainKeys.authToken),
+        if let _ = KeychainHelper.shared.loadString(forKey: KeychainKeys.authToken),
            let userId = KeychainHelper.shared.loadString(forKey: KeychainKeys.userId),
            let username = KeychainHelper.shared.loadString(forKey: KeychainKeys.username) {
-            self.currentUser = User(id: userId, username: username)
+            self.currentUser = User(id: userId, username: username, friendCode: nil, pendingRequestCount: nil)
             self.isAuthenticated = true
+            
+            // Fetch fresh user data from server
+            Task {
+                await refreshUserInfo()
+            }
         } else {
             self.isAuthenticated = false
             self.currentUser = nil
+        }
+    }
+    
+    func refreshUserInfo() async {
+        do {
+            let user = try await APIService.shared.getCurrentUser()
+            self.currentUser = user
+            self.pendingRequestCount = user.pendingRequestCount ?? 0
+        } catch {
+            print("Failed to refresh user info: \(error)")
         }
     }
     
@@ -83,6 +99,7 @@ final class AuthViewModel: ObservableObject {
         _ = KeychainHelper.shared.save(response.user.id, forKey: KeychainKeys.userId)
         _ = KeychainHelper.shared.save(response.user.username, forKey: KeychainKeys.username)
         self.currentUser = response.user
+        self.pendingRequestCount = response.user.pendingRequestCount ?? 0
     }
     
     func logout() {

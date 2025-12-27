@@ -174,4 +174,74 @@ final class APIService: ObservableObject {
             method: "DELETE"
         )
     }
+    
+    // MARK: - Friends
+    func getFriends() async throws -> [Friend] {
+        let response: FriendsListResponse = try await request(
+            endpoint: "/api/friends"
+        )
+        return response.friends
+    }
+    
+    func getIncomingRequests() async throws -> [FriendRequest] {
+        let response: FriendRequestsResponse = try await request(
+            endpoint: "/api/friends/requests"
+        )
+        return response.requests
+    }
+    
+    func getOutgoingRequests() async throws -> [FriendRequest] {
+        let response: FriendRequestsResponse = try await request(
+            endpoint: "/api/friends/requests/outgoing"
+        )
+        return response.requests
+    }
+    
+    func sendFriendRequest(code: String) async throws -> SendFriendRequestResponse {
+        try await request(
+            endpoint: "/api/friends/request",
+            method: "POST",
+            body: ["code": code]
+        )
+    }
+    
+    func acceptFriendRequest(id: String) async throws -> AcceptFriendRequestResponse {
+        try await request(
+            endpoint: "/api/friends/requests/\(id)/accept",
+            method: "POST"
+        )
+    }
+    
+    func rejectFriendRequest(id: String) async throws -> MessageResponse {
+        try await request(
+            endpoint: "/api/friends/requests/\(id)/reject",
+            method: "POST"
+        )
+    }
+    
+    func removeFriend(id: String) async throws -> MessageResponse {
+        try await request(
+            endpoint: "/api/friends/\(id)",
+            method: "DELETE"
+        )
+    }
+    
+    func getFriendCode() async throws -> String {
+        let response: FriendCodeResponse = try await request(
+            endpoint: "/api/friends/code"
+        )
+        return response.code
+    }
+    
+    func regenerateFriendCode() async throws -> String {
+        let response: FriendCodeResponse = try await request(
+            endpoint: "/api/friends/code/regenerate",
+            method: "POST"
+        )
+        return response.code
+    }
+    
+    func getCurrentUser() async throws -> User {
+        try await request(endpoint: "/api/auth/me")
+    }
 }

@@ -8,6 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		012A5EFE2EFF029F00365820 /* SlideshowPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 012A5EFD2EFF029F00365820 /* SlideshowPlayerView.swift */; };
+		22222222222222222222221A /* FriendsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22222222222222222222221B /* FriendsViewModel.swift */; };
+		22222222222222222222221C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22222222222222222222221D /* SettingsView.swift */; };
+		22222222222222222222221E /* MyFriendCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22222222222222222222221F /* MyFriendCodeView.swift */; };
+		222222222222222222222220 /* AddFriendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222222222222222222222221 /* AddFriendView.swift */; };
+		222222222222222222222222 /* FriendRequestsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222222222222222222222223 /* FriendRequestsView.swift */; };
+		222222222222222222222224 /* FriendsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222222222222222222222225 /* FriendsListView.swift */; };
 		11111111111111111111111A /* cTikTokApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11111111111111111111111B /* cTikTokApp.swift */; };
 		11111111111111111111111C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11111111111111111111111D /* ContentView.swift */; };
 		11111111111111111111111E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 11111111111111111111111F /* Assets.xcassets */; };
@@ -46,6 +52,12 @@
 
 /* Begin PBXFileReference section */
 		012A5EFD2EFF029F00365820 /* SlideshowPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideshowPlayerView.swift; sourceTree = "<group>"; };
+		22222222222222222222221B /* FriendsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsViewModel.swift; sourceTree = "<group>"; };
+		22222222222222222222221D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		22222222222222222222221F /* MyFriendCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyFriendCodeView.swift; sourceTree = "<group>"; };
+		222222222222222222222221 /* AddFriendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendView.swift; sourceTree = "<group>"; };
+		222222222222222222222223 /* FriendRequestsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRequestsView.swift; sourceTree = "<group>"; };
+		222222222222222222222225 /* FriendsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsListView.swift; sourceTree = "<group>"; };
 		11111111111111111111111B /* cTikTokApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cTikTokApp.swift; sourceTree = "<group>"; };
 		11111111111111111111111D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		11111111111111111111111F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -142,6 +154,7 @@
 				111111111111111111111157 /* Auth */,
 				111111111111111111111158 /* Feed */,
 				111111111111111111111159 /* Send */,
+				222222222222222222222226 /* Settings */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -152,6 +165,7 @@
 				11111111111111111111112B /* AuthViewModel.swift */,
 				11111111111111111111112D /* VideoFeedViewModel.swift */,
 				11111111111111111111112F /* SendVideoViewModel.swift */,
+				22222222222222222222221B /* FriendsViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -215,6 +229,18 @@
 				11111111111111111111113B /* SendVideoView.swift */,
 			);
 			path = Send;
+			sourceTree = "<group>";
+		};
+		222222222222222222222226 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				22222222222222222222221D /* SettingsView.swift */,
+				22222222222222222222221F /* MyFriendCodeView.swift */,
+				222222222222222222222221 /* AddFriendView.swift */,
+				222222222222222222222223 /* FriendRequestsView.swift */,
+				222222222222222222222225 /* FriendsListView.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -325,6 +351,7 @@
 				11111111111111111111112A /* AuthViewModel.swift in Sources */,
 				11111111111111111111112C /* VideoFeedViewModel.swift in Sources */,
 				11111111111111111111112E /* SendVideoViewModel.swift in Sources */,
+				22222222222222222222221A /* FriendsViewModel.swift in Sources */,
 				111111111111111111111130 /* LoginView.swift in Sources */,
 				111111111111111111111132 /* RegisterView.swift in Sources */,
 				111111111111111111111134 /* VideoFeedView.swift in Sources */,
@@ -332,6 +359,11 @@
 				111111111111111111111138 /* EmptyFeedView.swift in Sources */,
 				012A5EFE2EFF029F00365820 /* SlideshowPlayerView.swift in Sources */,
 				11111111111111111111113A /* SendVideoView.swift in Sources */,
+				22222222222222222222221C /* SettingsView.swift in Sources */,
+				22222222222222222222221E /* MyFriendCodeView.swift in Sources */,
+				222222222222222222222220 /* AddFriendView.swift in Sources */,
+				222222222222222222222222 /* FriendRequestsView.swift in Sources */,
+				222222222222222222222224 /* FriendsListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

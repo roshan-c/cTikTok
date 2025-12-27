@@ -4,6 +4,7 @@ import AVKit
 struct VideoFeedView: View {
     @StateObject private var viewModel = VideoFeedViewModel()
     @EnvironmentObject var authViewModel: AuthViewModel
+    @State private var showingSettings = false
     
     var body: some View {
         ZStack {
@@ -14,6 +15,7 @@ struct VideoFeedView: View {
                     .tint(.white)
             } else if viewModel.videos.isEmpty {
                 EmptyFeedView()
+                    .environmentObject(authViewModel)
             } else {
                 videoFeed
             }
@@ -32,6 +34,10 @@ struct VideoFeedView: View {
         }
         .sheet(isPresented: $viewModel.showingSendSheet) {
             SendVideoView()
+        }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView()
+                .environmentObject(authViewModel)
         }
     }
     
@@ -73,9 +79,9 @@ struct VideoFeedView: View {
     private var topBar: some View {
         HStack {
             Button {
-                authViewModel.logout()
+                showingSettings = true
             } label: {
-                Image(systemName: "rectangle.portrait.and.arrow.right")
+                Image(systemName: "gearshape.fill")
                     .font(.title2)
                     .foregroundStyle(.white)
             }

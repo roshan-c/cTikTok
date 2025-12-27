@@ -3,8 +3,8 @@ import { z } from 'zod';
 import { createReadStream, existsSync } from 'fs';
 import { stat } from 'fs/promises';
 import { db } from '../db';
-import { videos, users } from '../db/schema';
-import { eq, desc, gt, and } from 'drizzle-orm';
+import { videos, users, friendships } from '../db/schema';
+import { eq, desc, gt, and, inArray } from 'drizzle-orm';
 import { generateVideoId } from '../utils/id';
 import { authMiddleware } from '../middleware/auth';
 import { config } from '../utils/config';
@@ -345,14 +345,27 @@ async function processContent(videoId: string, url: string): Promise<void> {
   }
 }
 
-// Get videos (last 24 hours by default, or all ready videos)
+// Get videos (last 24 hours by default, only from friends)
 videosRoute.get('/', async (c) => {
+  const user = c.get('user');
   const hoursParam = c.req.query('hours');
   const hours = hoursParam ? parseInt(hoursParam) : 24;
   
   const since = new Date();
   since.setHours(since.getHours() - hours);
 
+  // Get list of friend IDs
+  const userFriendships = await db
+    .select({ friendId: friendships.friendId })
+    .from(friendships)
+    .where(eq(friendships.userId, user.userId));
+  
+  const friendIds = userFriendships.map(f => f.friendId);
+  
+  // Include self and friends
+  const allowedSenderIds = [user.userId, ...friendIds];
+
+  // If no friends, only show own videos
   const videoList = await db
     .select({
       id: videos.id,
@@ -373,7 +386,8 @@ videosRoute.get('/', async (c) => {
     .leftJoin(users, eq(videos.senderId, users.id))
     .where(and(
       eq(videos.status, 'ready'),
-      gt(videos.createdAt, since)
+      gt(videos.createdAt, since),
+      inArray(videos.senderId, allowedSenderIds)
     ))
     .orderBy(desc(videos.createdAt));
 
@@ -413,8 +427,9 @@ videosRoute.get('/', async (c) => {
   });
 });
 
-// Check for new videos since timestamp
+// Check for new videos since timestamp (only from friends)
 videosRoute.get('/check', async (c) => {
+  const user = c.get('user');
   const sinceParam = c.req.query('since');
   
   if (!sinceParam) {
@@ -426,12 +441,22 @@ videosRoute.get('/check', async (c) => {
     return c.json({ error: 'Invalid timestamp' }, 400);
   }
 
+  // Get list of friend IDs
+  const userFriendships = await db
+    .select({ friendId: friendships.friendId })
+    .from(friendships)
+    .where(eq(friendships.userId, user.userId));
+  
+  const friendIds = userFriendships.map(f => f.friendId);
+  const allowedSenderIds = [user.userId, ...friendIds];
+
   const newVideos = await db
     .select({ id: videos.id })
     .from(videos)
     .where(and(
       eq(videos.status, 'ready'),
-      gt(videos.createdAt, since)
+      gt(videos.createdAt, since),
+      inArray(videos.senderId, allowedSenderIds)
     ));
 
   return c.json({

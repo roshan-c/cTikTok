@@ -2,9 +2,10 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
 import { db } from '../db';
-import { users } from '../db/schema';
+import { users, friendCodes, friendRequests } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { generateId } from '../utils/id';
+import { generateFriendCode } from '../utils/friendCode';
 import { generateToken, authMiddleware } from '../middleware/auth';
 
 const auth = new Hono();
@@ -49,12 +50,20 @@ auth.post('/register', async (c) => {
     passwordHash,
   });
 
+  // Generate friend code for new user
+  const code = generateFriendCode();
+  await db.insert(friendCodes).values({
+    id: generateId(),
+    userId,
+    code,
+  });
+
   const token = generateToken({ userId, username: username.toLowerCase() });
 
   return c.json({
     message: 'Account created successfully',
     token,
-    user: { id: userId, username: username.toLowerCase() },
+    user: { id: userId, username: username.toLowerCase(), friendCode: code },
   }, 201);
 });
 
@@ -85,17 +94,63 @@ auth.post('/login', async (c) => {
 
   const token = generateToken({ userId: user.id, username: user.username });
 
+  // Get friend code
+  let codeRecord = await db.query.friendCodes.findFirst({
+    where: eq(friendCodes.userId, user.id),
+  });
+
+  // Generate if doesn't exist (for existing users before this update)
+  if (!codeRecord) {
+    const newCode = generateFriendCode();
+    await db.insert(friendCodes).values({
+      id: generateId(),
+      userId: user.id,
+      code: newCode,
+    });
+    codeRecord = { id: '', userId: user.id, code: newCode, createdAt: new Date() };
+  }
+
   return c.json({
     message: 'Login successful',
     token,
-    user: { id: user.id, username: user.username },
+    user: { id: user.id, username: user.username, friendCode: codeRecord.code },
   });
 });
 
 // Get current user (protected)
 auth.get('/me', authMiddleware, async (c) => {
   const { userId, username } = c.get('user');
-  return c.json({ id: userId, username });
+
+  // Get friend code
+  let codeRecord = await db.query.friendCodes.findFirst({
+    where: eq(friendCodes.userId, userId),
+  });
+
+  // Generate if doesn't exist (for existing users before this update)
+  if (!codeRecord) {
+    const newCode = generateFriendCode();
+    await db.insert(friendCodes).values({
+      id: generateId(),
+      userId,
+      code: newCode,
+    });
+    codeRecord = { id: '', userId, code: newCode, createdAt: new Date() };
+  }
+
+  // Count pending friend requests
+  const pendingRequests = await db
+    .select()
+    .from(friendRequests)
+    .where(eq(friendRequests.toUserId, userId));
+  
+  const pendingRequestCount = pendingRequests.filter(r => r.status === 'pending').length;
+
+  return c.json({ 
+    id: userId, 
+    username,
+    friendCode: codeRecord.code,
+    pendingRequestCount,
+  });
 });
 
 export default auth;

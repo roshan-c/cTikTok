@@ -6,6 +6,7 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import authRoutes from './routes/auth';
 import videosRoutes from './routes/videos';
+import friendsRoutes from './routes/friends';
 import altstoreRoutes from './routes/altstore';
 
 const app = new Hono();
@@ -39,6 +40,7 @@ app.get('/health', (c) => c.json({ status: 'healthy' }));
 // Routes
 app.route('/api/auth', authRoutes);
 app.route('/api/videos', videosRoutes);
+app.route('/api/friends', friendsRoutes);
 app.route('/altstore', altstoreRoutes);
 
 // 404 handler

@@ -4,6 +4,8 @@ import Foundation
 struct User: Codable, Identifiable {
     let id: String
     let username: String
+    let friendCode: String?
+    let pendingRequestCount: Int?
 }
 
 // MARK: - Auth Response
@@ -11,6 +13,61 @@ struct AuthResponse: Codable {
     let message: String
     let token: String
     let user: User
+}
+
+// MARK: - Friend
+struct Friend: Codable, Identifiable {
+    let id: String
+    let username: String
+    let createdAt: Date
+}
+
+// MARK: - Friend User (used in requests)
+struct FriendUser: Codable, Identifiable {
+    let id: String
+    let username: String
+}
+
+// MARK: - Friend Request
+struct FriendRequest: Codable, Identifiable {
+    let id: String
+    let fromUser: FriendUser?
+    let toUser: FriendUser?
+    let status: String
+    let createdAt: Date
+}
+
+// MARK: - Friends Response
+struct FriendsListResponse: Codable {
+    let friends: [Friend]
+}
+
+// MARK: - Friend Requests Response
+struct FriendRequestsResponse: Codable {
+    let requests: [FriendRequest]
+}
+
+// MARK: - Friend Code Response
+struct FriendCodeResponse: Codable {
+    let code: String
+}
+
+// MARK: - Send Friend Request Response
+struct SendFriendRequestResponse: Codable {
+    let message: String
+    let toUser: FriendUser?
+    let friend: FriendUser?
+}
+
+// MARK: - Accept Friend Request Response
+struct AcceptFriendRequestResponse: Codable {
+    let message: String
+    let friend: FriendUser
+}
+
+// MARK: - Generic Message Response
+struct MessageResponse: Codable {
+    let message: String
 }
 
 // MARK: - Media Type
