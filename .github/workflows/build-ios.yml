@@ -93,33 +93,31 @@ jobs:
           # Get commit message for version description (sanitize for JSON)
           DESCRIPTION=$(git log -1 --pretty=%B | head -1 | sed 's/"/\\"/g' | cut -c1-100)
           
-          # Generate source.json (heredoc marker at column 0 to avoid indentation in output)
-          cat > backend/altstore/source.json <<ENDJSON
-{
-  "name": "cTikTok",
-  "identifier": "com.roshanc.ctiktok.source",
-  "subtitle": "Share TikToks with your girlfriend",
-  "sourceURL": "https://ctiktok.roshanc.com/altstore/source.json",
-  "apps": [
-    {
-      "name": "cTikTok",
-      "bundleIdentifier": "com.roshanc.ctiktok",
-      "developerName": "Roshan",
-      "subtitle": "Share TikToks without TikTok",
-      "version": "$VERSION",
-      "versionDate": "$DATE",
-      "versionDescription": "$DESCRIPTION",
-      "downloadURL": "https://ctiktok.roshanc.com/altstore/cTikTok.ipa",
-      "localizedDescription": "A private app for sharing TikTok videos and slideshows. Features a TikTok-style vertical swipe interface, automatic video transcoding, and support for photo slideshows with audio.",
-      "iconURL": "https://ctiktok.roshanc.com/altstore/icon.png",
-      "tintColor": "E91E63",
-      "size": $SIZE,
-      "screenshotURLs": []
-    }
-  ],
-  "news": []
-}
-ENDJSON
+          # Generate source.json
+          echo '{
+            "name": "cTikTok",
+            "identifier": "com.roshanc.ctiktok.source",
+            "subtitle": "Share TikToks with your girlfriend",
+            "sourceURL": "https://ctiktok.roshanc.com/altstore/source.json",
+            "apps": [
+              {
+                "name": "cTikTok",
+                "bundleIdentifier": "com.roshanc.ctiktok",
+                "developerName": "Roshan",
+                "subtitle": "Share TikToks without TikTok",
+                "version": "'"$VERSION"'",
+                "versionDate": "'"$DATE"'",
+                "versionDescription": "'"$DESCRIPTION"'",
+                "downloadURL": "https://ctiktok.roshanc.com/altstore/cTikTok.ipa",
+                "localizedDescription": "A private app for sharing TikTok videos and slideshows. Features a TikTok-style vertical swipe interface, automatic video transcoding, and support for photo slideshows with audio.",
+                "iconURL": "https://ctiktok.roshanc.com/altstore/icon.png",
+                "tintColor": "E91E63",
+                "size": '"$SIZE"',
+                "screenshotURLs": []
+              }
+            ],
+            "news": []
+          }' > backend/altstore/source.json
           
           echo "source.json updated:"
           cat backend/altstore/source.json
